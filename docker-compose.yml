@@ -1,5 +1,7 @@
 version: '3.7'
 
+# from:   https://docs.min.io/docs/deploy-minio-on-docker-compose.html
+
 # starts 4 docker containers running minio server instances.
 # using nginx reverse proxy, load balancing, you can access
 # it through port 9000.

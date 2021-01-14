@@ -1,0 +1,24 @@
+channels:
+  - ome
+  - conda-forge
+  - joshmoore
+  - defaults
+dependencies:
+  - python == 3.9.0
+  - napari
+  - ipython
+  - wheel
+  - requests
+  - s3fs
+  - scikit-image
+  - scipy
+  - xarray
+  - zarr >= 2.4.0
+  - bioformats2raw
+  - raw2ometiff
+  - go-mc
+  - pip
+  - pip:
+      - PyQT5==5.13.1
+      - ome-zarr
+      - awscli

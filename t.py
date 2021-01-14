@@ -6,6 +6,7 @@ import h5py
 import pytest
 import requests
 import s3fs
+import tifffile
 from botocore import UNSIGNED
 from botocore.client import Config
 
@@ -71,7 +72,23 @@ def test_1_byte_overhead(benchmark, method):
 
 @pytest.mark.parametrize("method", (local, http, boto3, s3fs))
 def test_zarr_chunk(benchmark, method):
-    benchmark(method, "a.ome.zarr/0/0.0.0.0.0")
+    benchmark(method, "retina_large.ome.zarr/0/0.0.0.0.0")
+
+
+@pytest.mark.parametrize("method", (local, http, boto3, s3fs))
+def test_tiff_tile(benchmark, method):
+    def loader(opened_file):
+        with tifffile.TiffFile(opened_file) as tif:
+            fh = tif.filehandle
+            for page in tif.pages:
+                for index, (offset, bytecount) in enumerate(
+                    zip(page.dataoffsets, page.databytecounts)
+                ):
+                    fh.seek(offset)
+                    fh.read(bytecount)
+                    return
+
+    benchmark(method, "retina_large.ome.tiff", loader)
 
 
 @pytest.mark.parametrize("method", (local, http, boto3, s3fs))
@@ -82,3 +99,16 @@ def test_hdf5_chunk(benchmark, method):
             len(data[0:16, 0:256, 0:256])  # FIXME - not first chunk
 
     benchmark(method, "retina_large.ims", loader)
+
+
+@pytest.mark.parametrize("method", (local, http, boto3, s3fs))
+def test_download_1(benchmark, method):
+    def loader(opened_file):
+        opened_file.read()
+
+    benchmark(method, "retina_large.ims", loader)
+
+
+@pytest.mark.parametrize("method", (local, http, boto3, s3fs))
+def test_download_2(benchmark, method):
+    benchmark(method, "retina_large.ims")
