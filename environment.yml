@@ -9,6 +9,7 @@ dependencies:
   - ipython
   - wheel
   - requests
+  - h5py
   - s3fs
   - scikit-image
   - scipy
@@ -22,3 +23,5 @@ dependencies:
       - PyQT5==5.13.1
       - ome-zarr
       - awscli
+      - pytest-benchmark
+      - boto3
