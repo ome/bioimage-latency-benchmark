@@ -81,12 +81,9 @@ def test_tiff_tile(benchmark, method):
         with tifffile.TiffFile(opened_file) as tif:
             fh = tif.filehandle
             for page in tif.pages:
-                for index, (offset, bytecount) in enumerate(
-                    zip(page.dataoffsets, page.databytecounts)
-                ):
-                    fh.seek(offset)
-                    fh.read(bytecount)
-                    return
+                fh.seek(page.dataoffsets[0])
+                fh.read(page.databytecounts[0])
+                return
 
     benchmark(method, "retina_large.ome.tiff", loader)
 
