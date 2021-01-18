@@ -96,7 +96,8 @@ def test_hdf5_chunk(benchmark, method):
     def loader(opened_file):
         with h5py.File(opened_file) as f:
             data = f["DataSet"]["ResolutionLevel 0"]["TimePoint 0"]["Channel 0"]["Data"]
-            len(data[0:16, 0:256, 0:256])  # FIXME - not first chunk
+            chunks = data.chunks
+            len(data[0:chunks[0]-1, 0:chunks[1]-1, 0:chunks[2]-1])
 
     benchmark(method, "retina_large.ims", loader)
 
