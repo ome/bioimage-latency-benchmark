@@ -81,12 +81,9 @@ def test_tiff_tile(benchmark, method):
         with tifffile.TiffFile(opened_file) as tif:
             fh = tif.filehandle
             for page in tif.pages:
-                for index, (offset, bytecount) in enumerate(
-                    zip(page.dataoffsets, page.databytecounts)
-                ):
-                    fh.seek(offset)
-                    fh.read(bytecount)
-                    return
+                fh.seek(page.dataoffsets[0])
+                fh.read(page.databytecounts[0])
+                return
 
     benchmark(method, "retina_large.ome.tiff", loader)
 
@@ -96,7 +93,8 @@ def test_hdf5_chunk(benchmark, method):
     def loader(opened_file):
         with h5py.File(opened_file) as f:
             data = f["DataSet"]["ResolutionLevel 0"]["TimePoint 0"]["Channel 0"]["Data"]
-            len(data[0:16, 0:256, 0:256])  # FIXME - not first chunk
+            chunks = data.chunks
+            len(data[0:chunks[0]-1, 0:chunks[1]-1, 0:chunks[2]-1])
 
     benchmark(method, "retina_large.ims", loader)
 
