@@ -14,13 +14,13 @@ docker-compose up
 
 Open a new terminal and go to ``ngff-latency-benchmark``
 
-* Create a conda environment using [environment.yml](environment.yml) file.
+Create a conda environment using [environment.yml](environment.yml) file.
 ```
  conda env create -f
 ```
-* Activate the conda environment 
+Activate the conda environment 
 ```
 conda activate ngff-latency-benchmarking
 ```
 
-* Run the [setup.sh](setup.sh) script to generate the various imaging testing files from an IMARIS file.
+Run the [setup.sh](setup.sh) script to generate the various imaging testing files from an IMARIS file.
