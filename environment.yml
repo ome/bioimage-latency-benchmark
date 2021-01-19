@@ -1,3 +1,4 @@
+name: ngff-latency-benchmarking
 channels:
   - ome
   - conda-forge
@@ -19,6 +20,7 @@ dependencies:
   - raw2ometiff
   - go-mc
   - pip
+  - minio
   - pip:
       - PyQT5==5.13.1
       - ome-zarr
