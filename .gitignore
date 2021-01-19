@@ -2,3 +2,6 @@ __pycache__
 data/*.ims
 data/*.tiff
 data/*.zarr
+tmp
+.retina*
+retina*
