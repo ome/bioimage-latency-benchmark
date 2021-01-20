@@ -13,4 +13,4 @@ mc policy set public benchmark/data
 mc cp -r *.ims benchmark/data/
 mc cp -r *.tiff benchmark/data/
 mc cp -r *.zarr benchmark/data/
-mc cp -r data/1-byte benchmark/data/
+mc cp -r 1-byte benchmark/data/
