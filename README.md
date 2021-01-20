@@ -23,7 +23,7 @@ Activate the conda environment
 conda activate ngff-latency-benchmarking
 ```
 
-Go the data directory and run the [setup.sh](setup.sh) script to generate the various imaging testing files from an IMARIS file.
+Go the ``data`` directory and run the [setup.sh](setup.sh) script to generate the various imaging testing files from an IMARIS file.
 ```
 cd data
 ../setup.sh
