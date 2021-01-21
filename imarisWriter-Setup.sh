@@ -36,7 +36,7 @@ cd ImarisWriter
 mkdir release
 cd release
 cmake -DHDF5_ROOT:PATH="../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0" -DZLIB_ROOT:PATH="../zlib-1.2.11/zlibInstall" -DLZ4_ROOT:PATH="../lz4-dev/lz4-install/usr/local" ..
-cd ..
+cd ../..
 
 #imarisWriterTest
 wget -N -O ImarisWriterTest.zip https://github.com/dgault/ImarisWriterTest/archive/ngff-benchmark-gen.zip
