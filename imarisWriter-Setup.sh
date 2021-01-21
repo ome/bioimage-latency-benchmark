@@ -31,7 +31,8 @@ cd ..
 #imarisWriter
 wget -N -O ImarisWriter.zip https://github.com/dgault/ImarisWriter/archive/master.zip
 unzip ImarisWriter.zip
-cd ImarisWriter-master
+mv ImarisWriter-master ImarisWriter
+cd ImarisWriter
 mkdir release
 cd release
 cmake -DHDF5_ROOT:PATH="../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0" -DZLIB_ROOT:PATH="../zlib-1.2.11/zlibInstall" -DLZ4_ROOT:PATH="../lz4-dev/lz4-install/usr/local" ..
@@ -42,6 +43,6 @@ wget -N -O ImarisWriterTest.zip https://github.com/dgault/ImarisWriterTest/archi
 unzip ImarisWriterTest.zip
 mv ImarisWriterTest-ngff-benchmark-gen ImarisWriterTest
 cd ImarisWriterTest/application
-clang++ -std=c++11  -I. -I../../ImarisWriter-master/release/lib -o ImarisWriterTestRelease ImarisWriterTest.cxx -lbpImarisWriter96 -lpthread -rpath ../../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0/lib
+clang++ -std=c++11  -I../.. -L../../ImarisWriter/release/lib -o ImarisWriterTestRelease ImarisWriterTest.cxx -lbpImarisWriter96 -lpthread -rpath ../../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0/lib
 cd ../..
 
