@@ -1,16 +1,16 @@
 #hdf5
-wget -N -O CMake-hdf5-1.12.0.tar.gz https://www.hdfgroup.org/package/cmake-hdf5-1-12-0-tar-gz/?wpdmdl=14580&refresh=600867a2422561611163554
+wget -N -O CMake-hdf5-1.12.0.tar.gz "https://www.hdfgroup.org/package/cmake-hdf5-1-12-0-tar-gz/?wpdmdl=14580&refresh=600867a2422561611163554"
 tar -xzf CMake-hdf5-1.12.0.tar.gz
 cd CMake-hdf5-1.12.0
 ./build-unix.sh
 cd build
 make install
 cd ..
-cp -r build/_CPack_Packages/Darwin/TGZ/HDF5-1.12.0-Darwin/HDF_Group/HDF5/1.12.0/share/cmake/szip HDF_Group/HDF5/1.12.0/share/cmake
-cp -r build/_CPack_Packages/Darwin/TGZ/HDF5-1.12.0-Darwin/HDF_Group/HDF5/1.12.0/share/cmake/zlib HDF_Group/HDF5/1.12.0/share/cmake
-cp -r build/_CPack_Packages/Darwin/TGZ/HDF5-1.12.0-Darwin/HDF_Group/HDF5/1.12.0/lib HDF_Group/HDF5/1.12.0
-cp -r build/_CPack_Packages/Darwin/TGZ/HDF5-1.12.0-Darwin/HDF_Group/HDF5/1.12.0/bin HDF_Group/HDF5/1.12.0
-cp -r build/_CPack_Packages/Darwin/TGZ/HDF5-1.12.0-Darwin/HDF_Group/HDF5/1.12.0/include HDF_Group/HDF5/1.12.0
+cp -r build/_CPack_Packages/Linux/TGZ/HDF5-1.12.0-Linux/HDF_Group/HDF5/1.12.0/share/cmake/szip HDF_Group/HDF5/1.12.0/share/cmake
+cp -r build/_CPack_Packages/Linux/TGZ/HDF5-1.12.0-Linux/HDF_Group/HDF5/1.12.0/share/cmake/zlib HDF_Group/HDF5/1.12.0/share/cmake
+cp -r build/_CPack_Packages/Linux/TGZ/HDF5-1.12.0-Linux/HDF_Group/HDF5/1.12.0/lib HDF_Group/HDF5/1.12.0
+cp -r build/_CPack_Packages/Linux/TGZ/HDF5-1.12.0-Linux/HDF_Group/HDF5/1.12.0/bin HDF_Group/HDF5/1.12.0
+cp -r build/_CPack_Packages/Linux/TGZ/HDF5-1.12.0-Linux/HDF_Group/HDF5/1.12.0/include HDF_Group/HDF5/1.12.0
 cd ..
 
 #zlib
