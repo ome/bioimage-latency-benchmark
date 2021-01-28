@@ -2,3 +2,4 @@ __pycache__
 data/*.ims
 data/*.tiff
 data/*.zarr
+*.swp
