@@ -1,3 +1,4 @@
+name: ngff-latency-benchmarking
 channels:
   - ome
   - conda-forge
