@@ -1,4 +1,6 @@
+#!/usr/bin/env bash
 #hdf5
+
 wget -N -O CMake-hdf5-1.12.0.tar.gz "https://www.hdfgroup.org/package/cmake-hdf5-1-12-0-tar-gz/?wpdmdl=14580&refresh=600867a2422561611163554"
 tar -xzf CMake-hdf5-1.12.0.tar.gz
 cd CMake-hdf5-1.12.0
@@ -46,4 +48,3 @@ mv ImarisWriterTest-ngff-benchmark-gen ImarisWriterTest
 cd ImarisWriterTest/application
 clang++ -std=c++11  -I../.. -L../../ImarisWriter/release/lib -o ImarisWriterTestRelease ImarisWriterTest.cxx -lbpImarisWriter96 -lpthread -rpath ../../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0/lib
 cd ../..
-
