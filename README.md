@@ -16,7 +16,7 @@ Open a new terminal and go to ``ngff-latency-benchmark``
 
 Create a conda environment using [environment.yml](environment.yml) file.
 ```
- conda env create -f
+conda env create -n ngff-latency-benchmark -f environment.yml
 ```
 Activate the conda environment 
 ```
