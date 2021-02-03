@@ -1,35 +1,24 @@
 #!/usr/bin/env bash
-#generate files
+# generate files
 
 set -e
 set -u
+set -x
 
 OUTPUT=${1:-ImarisFiles}
-echo **********************************
-echo Writing data to: $OUTPUT
-echo **********************************
+THREADS=${THREADS:-8}
+BITS=${BITS:-16bit}
+echo ********************************************************************
+echo Writing ${BITS} data with ${THREADS} threads to: $OUTPUT
+echo ********************************************************************
 
 cd ImarisWriterTest/application
-mkdir ${OUTPUT}
+mkdir -p ${OUTPUT}
 
-convert(){
-    ./ImarisWriterTestRelease -sizex $x -sizey $x -sizez $z -sizet $t -sizec $c -chunkx $xc -chunky $xc -chunkz $zc -type 16bit -threads 8 -outputpath ${OUTPUT}  IMS_XY-$x-Z-$z-T-$t-C-$c-XYC-$xc-ZC-$zc.ims
-}
-
-# https://github.com/ome/ngff-latency-benchmark/issues/5
-x=131072
-z=131072
-c=32
-t=1
-xc=1024
-zc=1024
-convert
-
-# https://github.com/ome/ngff-latency-benchmark/issues/6
-x=512
-z=512
-c=2
-t=512
-xc=64
-zc=64
-convert
+x=$2
+z=$3
+c=$4
+t=$5
+xc=$6
+zc=$7
+./ImarisWriterTestRelease -sizex $x -sizey $x -sizez $z -sizet $t -sizec $c -chunkx $xc -chunky $xc -chunkz $zc -type ${BITS} -threads ${THREADS} -outputpath ${OUTPUT} IMS_XY-$x-Z-$z-T-$t-C-$c-XYC-$xc-ZC-$zc.ims
