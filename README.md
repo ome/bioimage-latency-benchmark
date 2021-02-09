@@ -1,11 +1,18 @@
-How to use this repository
---------------------------
+# How to use this repository
+
+## Generate sample data
 
 Clone this repository:
 ```
 git clone https://github.com/ome/ngff-latency-benchmark.git
 cd ngff-latency-benchmark
 ```
+
+```
+env DIR=STORAGE_LOCATION ./run.sh
+```
+
+## Run benchmark
 
 Start the various Docker containers.
 ```
