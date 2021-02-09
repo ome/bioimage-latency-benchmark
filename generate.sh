@@ -20,13 +20,16 @@ docker-compose run ${CLEAN} -v $DIR:$DIR \
 	$XY $Z $C $T $XC $ZC
 
 docker-compose run ${CLEAN} -v $DIR:$DIR \
-	convert $BF2RAW --nested \
+	convert $BF2RAW \
+		--nested \
+		--compression=raw \
 		$DIR/$IMS \
 		$DIR/out \
 	-w $XC -h $XC
 
 docker-compose run ${CLEAN} -v $DIR:$DIR \
 	convert $RAW2OMETIFF \
+		--compression=raw \
 		$DIR/out \
 		$DIR/$TIFF
 
