@@ -13,14 +13,15 @@ from os import environ
 
 DIR = environ.get("DIR", "data")
 BASE = environ.get("BASE", "retina_large")
+HOST = environ.get("HOST", "localhost")
 
 fs = s3fs.S3FileSystem(
-    anon=True, client_kwargs={"endpoint_url": "http://localhost:9000"}
+    anon=True, client_kwargs={"endpoint_url": f"http://{HOST}:9000"}
 )
 
 b3 = boto3.client(
     "s3",
-    endpoint_url="http://localhost:9000",
+    endpoint_url=f"http://{HOST}:9000",
     config=Config(signature_version=UNSIGNED),
 )
 
@@ -37,12 +38,12 @@ def local(filename, loader=None):
 
 
 def http(filename, loader=None):
-    url = f"http://localhost:8000/{filename}"
+    url = f"http://{HOST}:8000/{filename}"
     if loader:
         with fsspec.open(url) as f:
             loader(f)
     else:
-        elapsed = requests.get(f"http://localhost:8000/{filename}").elapsed
+        elapsed = requests.get(url).elapsed
         return elapsed.microseconds / 1000000
 
 

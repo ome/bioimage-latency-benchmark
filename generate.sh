@@ -1,18 +1,12 @@
 #!/usr/bin/env bash
 
-DIR=${DIR:-/uod/idr-scratch/ngff-latency-benchmark/2021-02-09-quick}
+test -e .env && . .env
+DIR=${DIR:-./data}
 CLEAN=${CLEAN:-"--rm"}
 
 set -e
 set -u
 set -x
-
-XY=64
-Z=1
-C=1
-T=1
-XC=8
-ZC=8
 
 IMS=IMS_XY-${XY}-Z-${Z}-T-${T}-C-${C}-XYC-${XC}-ZC-${ZC}.ims
 ZARR=IMS_XY-${XY}-Z-${Z}-T-${T}-C-${C}-XYC-${XC}-ZC-${ZC}.ome.zarr
