@@ -28,3 +28,14 @@ Go the ``data`` directory and run the [setup.sh](setup.sh) script to generate th
 cd data
 ../setup.sh
 ```
+
+Now you can run the tests, that will benchmark the download of chunks from the test files.
+Saving the output as json:
+```
+pytest t.py --benchmark-save=ngff_benchmark --benchmark-save-data
+```
+
+To plot the json data as `benchmark_plog.png`:
+```
+python plot_results.py
+```
