@@ -40,3 +40,6 @@ docker-compose run ${CLEAN} -v $DIR:$DIR \
 	convert mv \
 		$DIR/out/data.zarr/0 \
 		$DIR/$ZARR
+
+docker-compose run ${CLEAN} -v $DIR:$DIR \
+	convert dd bs=1 count=1 if=/dev/random of=$DIR/1-byte

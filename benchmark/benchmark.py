@@ -9,6 +9,10 @@ import s3fs
 import tifffile
 from botocore import UNSIGNED
 from botocore.client import Config
+from os import environ
+
+DIR = environ.get("DIR", "data")
+BASE = environ.get("BASE", "retina_large")
 
 fs = s3fs.S3FileSystem(
     anon=True, client_kwargs={"endpoint_url": "http://localhost:9000"}
@@ -23,7 +27,7 @@ b3 = boto3.client(
 
 def local(filename, loader=None):
     start = time.time()
-    with open(f"data/{filename}", "rb") as o:
+    with open(f"{DIR}/{filename}", "rb") as o:
         if loader:
             loader(o)
         else:
@@ -72,7 +76,7 @@ def test_1_byte_overhead(benchmark, method):
 
 @pytest.mark.parametrize("method", (local, http, boto3, s3fs))
 def test_zarr_chunk(benchmark, method):
-    benchmark(method, "retina_large.ome.zarr/0/0.0.0.0.0")
+    benchmark(method, f"{BASE}.ome.zarr/0/0/0/0/0/0")
 
 
 @pytest.mark.parametrize("method", (local, http, boto3, s3fs))
@@ -85,7 +89,7 @@ def test_tiff_tile(benchmark, method):
                 fh.read(page.databytecounts[0])
                 return
 
-    benchmark(method, "retina_large.ome.tiff", loader)
+    benchmark(method, f"{BASE}.ome.tiff", loader)
 
 
 @pytest.mark.parametrize("method", (local, http, boto3, s3fs))
@@ -96,7 +100,7 @@ def test_hdf5_chunk(benchmark, method):
             chunks = data.chunks
             len(data[0:chunks[0]-1, 0:chunks[1]-1, 0:chunks[2]-1])
 
-    benchmark(method, "retina_large.ims", loader)
+    benchmark(method, f"{BASE}.ims", loader)
 
 
 @pytest.mark.parametrize("method", (local, http, boto3, s3fs))
@@ -104,9 +108,9 @@ def test_download_1(benchmark, method):
     def loader(opened_file):
         opened_file.read()
 
-    benchmark(method, "retina_large.ims", loader)
+    benchmark(method, f"{BASE}.ims", loader)
 
 
 @pytest.mark.parametrize("method", (local, http, boto3, s3fs))
 def test_download_2(benchmark, method):
-    benchmark(method, "retina_large.ims")
+    benchmark(method, f"{BASE}.ims")

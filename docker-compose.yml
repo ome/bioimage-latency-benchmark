@@ -17,6 +17,12 @@ services:
     tty: true
     command: ["true"]
 
+  benchmark:
+    build: benchmark
+    stdin_open: true
+    tty: true
+    command: ["true"]
+
 
 # from:   https://docs.min.io/docs/deploy-minio-on-docker-compose.html
 

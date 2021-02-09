@@ -1,5 +1,6 @@
 # How to use this repository
 
+
 ## Generate sample data
 
 Clone this repository:
@@ -9,10 +10,19 @@ cd ngff-latency-benchmark
 ```
 
 ```
-env DIR=STORAGE_LOCATION ./run.sh
+env DIR=STORAGE_LOCATION ./generate.sh
 ```
 
-## Run benchmark
+## Or, alternatively download a sample file
+
+```
+mkdir data
+cd data
+../retina.sh
+```
+
+
+## Then, start S3 and upload the data
 
 Start the various Docker containers.
 ```
@@ -33,5 +43,12 @@ conda activate ngff-latency-benchmarking
 Go the ``data`` directory and run the [setup.sh](setup.sh) script to generate the various imaging testing files from an IMARIS file.
 ```
 cd data
-../setup.sh
+../upload.sh
+```
+
+
+## Finally, run the benchmark
+
+```
+docker-compose run --rm benchmark
 ```
