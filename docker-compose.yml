@@ -43,6 +43,7 @@ services:
     command: ["true"]
     volumes:
       - "${DIR}:${DIR}:ro"
+      - "./benchmark/benchmark.py:/tmp/benchmark.py"
     environment:
       - BASE
       - DIR
@@ -57,8 +58,8 @@ services:
   minio1:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
     volumes:
-      - data1-1:/data1
-      - data1-2:/data2
+      - "${ROOT}/data1-1:/data1"
+      - "${ROOT}/data1-2:/data2"
     expose:
       - "9000"
     environment:
@@ -74,8 +75,8 @@ services:
   minio2:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
     volumes:
-      - data2-1:/data1
-      - data2-2:/data2
+      - "${ROOT}/data2-1:/data1"
+      - "${ROOT}/data2-2:/data2"
     expose:
       - "9000"
     environment:
@@ -91,8 +92,8 @@ services:
   minio3:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
     volumes:
-      - data3-1:/data1
-      - data3-2:/data2
+      - "${ROOT}/data3-1:/data1"
+      - "${ROOT}/data3-2:/data2"
     expose:
       - "9000"
     environment:
@@ -108,8 +109,8 @@ services:
   minio4:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
     volumes:
-      - data4-1:/data1
-      - data4-2:/data2
+      - "$ROOT}/data4-1:/data1"
+      - "$ROOT}/data4-2:/data2"
     expose:
       - "9000"
     environment:
@@ -135,15 +136,3 @@ services:
       - minio2
       - minio3
       - minio4
-
-## By default this config uses default local driver,
-## For custom volumes replace with volume driver configuration.
-volumes:
-  data1-1:
-  data1-2:
-  data2-1:
-  data2-2:
-  data3-1:
-  data3-2:
-  data4-1:
-  data4-2:
