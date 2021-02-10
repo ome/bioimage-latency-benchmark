@@ -45,3 +45,14 @@ docker-compose run --rm upload
 ```
 docker-compose run --rm benchmark -sv
 ```
+
+Now you can run the tests, that will benchmark the download of chunks from the test files.
+Saving the output as json:
+```
+pytest t.py --benchmark-save=ngff_benchmark --benchmark-save-data
+```
+
+To plot the json data as `benchmark_plog.png`:
+```
+python plot_results.py
+```
