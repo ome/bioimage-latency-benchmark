@@ -54,24 +54,12 @@ colors = [get_color(label) for label in labels]
 
 fig1, ax1 = plt.subplots(figsize=(10, 5), dpi=100)
 ax1.set_title(f'ngff benchmark ({xy}x{xy})')
-boxplot = ax1.boxplot(
+ax1.set_yticklabels(labels)
+vplot = ax1.violinplot(
     data,
-    labels=labels,
     positions=range(len(labels), 0, -1),  # reverse order
-    patch_artist=True,  # fill with color
-    # showfliers=False,
     vert=False)
 
-for color, patch in zip(colors, boxplot['boxes']):
-    patch.set_facecolor(color)
-    patch.set_edgecolor('grey')
-for feature in ['caps', 'whiskers']:
-    for line in boxplot[feature]:
-        line.set_color('grey')
-for line in boxplot['means']:
-    line.set_color('black')
-for circle in boxplot['fliers']:
-    circle.set_color('grey')
 ax1.set_xscale('log')
 ax1.set_xlabel('Chunk loading time (secs)')
 
