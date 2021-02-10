@@ -42,8 +42,8 @@ services:
     tty: true
     command: ["true"]
     volumes:
-      - "${DIR}:${DIR}:ro"
-      - "./benchmark/benchmark.py:/tmp/benchmark.py"
+      - "${DIR}:${DIR}"
+      - "./benchmark:/benchmark:ro"
     environment:
       - BASE
       - DIR

@@ -2,8 +2,10 @@
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
-json_path = ".benchmarks/Darwin-CPython-3.9-64bit/0005_ngff_benchmark.json"
+json_path = os.environ.get("BENCHMARK_DATA", "benchmark_data.json")
+plot_path = os.environ.get("BENCHMARK_PLOT", "benchmark_plot.png")
 
 # s3+hdf5, s3+tiff, s3+zarr, remote+hdf5, remote+… so I’d color by tiff/hdf5/zarr
 
@@ -17,16 +19,16 @@ with open(json_path) as json_file:
         named_data[label] = bm['stats']['data']
 
 # print(named_data.keys())
-# ['1_byte_overhead[local]', '1_byte_overhead[http]', '1_byte_overhead[boto3]', '1_byte_overhead[s3fs]',
-# 'zarr_chunk[local]', 'zarr_chunk[http]', 'zarr_chunk[boto3]', 'zarr_chunk[s3fs]',
-# 'tiff_tile[local]', 'tiff_tile[http]', 'tiff_tile[s3fs]',
-# 'hdf5_chunk[local]', 'hdf5_chunk[http]', 'hdf5_chunk[s3fs]',
-# 'download_1[local]', 'download_1[http]', 'download_1[s3fs]',
-# 'download_2[local]', 'download_2[http]', 'download_2[boto3]', 'download_2[s3fs]']
+# ['1_byte_overhead[local]', '1_byte_overhead[http]', '1_byte_overhead[boto3]', '1_byte_overhead[s3]',
+# 'zarr_chunk[local]', 'zarr_chunk[http]', 'zarr_chunk[boto3]', 'zarr_chunk[s3]',
+# 'tiff_tile[local]', 'tiff_tile[http]', 'tiff_tile[s3]',
+# 'hdf5_chunk[local]', 'hdf5_chunk[http]', 'hdf5_chunk[s3]',
+# 'download_1[local]', 'download_1[http]', 'download_1[s3]',
+# 'download_2[local]', 'download_2[http]', 'download_2[boto3]', 'download_2[3fs]']
 
 # plot [hdf5/tiff/zarr] for s3, remote, local
 to_plot = [
-    'hdf5_chunk[s3fs]', 'tiff_tile[s3fs]', 'zarr_chunk[s3fs]',
+    'hdf5_chunk[s3]', 'tiff_tile[s3]', 'zarr_chunk[s3]',
     'hdf5_chunk[http]', 'tiff_tile[http]', 'zarr_chunk[http]',
     'hdf5_chunk[local]', 'tiff_tile[local]', 'zarr_chunk[local]'
 ]
@@ -69,4 +71,4 @@ ax1.set_xscale('log')
 ax1.set_xlabel('Chunk loading time (secs)')
 
 plt.tight_layout()
-plt.savefig('benchmark_plot.png')
+plt.savefig(plot_path)
