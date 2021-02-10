@@ -7,6 +7,8 @@ import os
 json_path = os.environ.get("BENCHMARK_DATA", "benchmark_data.json")
 plot_path = os.environ.get("BENCHMARK_PLOT", "benchmark_plot.png")
 
+xy = os.environ.get("XY", "unknown")
+
 # s3+hdf5, s3+tiff, s3+zarr, remote+hdf5, remote+… so I’d color by tiff/hdf5/zarr
 
 named_data = {}
@@ -28,27 +30,30 @@ with open(json_path) as json_file:
 
 # plot [hdf5/tiff/zarr] for s3, remote, local
 to_plot = [
-    'hdf5_chunk[s3]', 'tiff_tile[s3]', 'zarr_chunk[s3]',
-    'hdf5_chunk[http]', 'tiff_tile[http]', 'zarr_chunk[http]',
-    'hdf5_chunk[local]', 'tiff_tile[local]', 'zarr_chunk[local]'
+    'hdf5_chunk[s3]', 'tiff_tile[s3]', 'zarr_chunk[s3]', '1_byte_overhead[s3]',
+    'hdf5_chunk[http]', 'tiff_tile[http]', 'zarr_chunk[http]', '1_byte_overhead[http]',
+    'hdf5_chunk[local]', 'tiff_tile[local]', 'zarr_chunk[local]', '1_byte_overhead[local]',
 ]
 labels = [
-    'hdf5 (s3)', 'tiff (s3)', 'zarr (s3)',
-    'hdf5 (remote)', 'tiff (remote)', 'zarr (remote)',
-    'hdf5 (local)', 'tiff (local)', 'zarr (local]'
+    'hdf5 (s3)', 'tiff (s3)', 'zarr (s3)', 'overhead (s3)',
+    'hdf5 (remote)', 'tiff (remote)', 'zarr (remote)', 'overhead (remote)',
+    'hdf5 (local)', 'tiff (local)', 'zarr (local]', 'overhead (local)',
 ]
 data = [named_data[key] for key in to_plot]
 
 def get_color(label):
     if 'hdf5' in label:
         return 'blue'
-    if 'tiff' in label:
+    elif 'tiff' in label:
         return 'green'
-    return 'pink'
+    elif 'overhead' in label:
+        return 'yellow'
+    else:
+        return 'pink'
 colors = [get_color(label) for label in labels]
 
 fig1, ax1 = plt.subplots(figsize=(10, 5), dpi=100)
-ax1.set_title('ngff benchmark')
+ax1.set_title(f'ngff benchmark ({xy}x{xy})')
 boxplot = ax1.boxplot(
     data,
     labels=labels,

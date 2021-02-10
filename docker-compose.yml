@@ -45,6 +45,7 @@ services:
       - "${DIR}:${DIR}"
       - "./benchmark:/benchmark:ro"
     environment:
+      - XY
       - BASE
       - DIR
       - HOST
