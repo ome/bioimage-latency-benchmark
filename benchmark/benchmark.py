@@ -39,15 +39,16 @@ def test_1_byte_overhead(benchmark, method):
 
 @pytest.mark.parametrize("method", (local, http, s3))
 def test_zarr_chunk(benchmark, method):
+ 
+    filename, fs = method(f"{BASE}.ome.zarr")
+    group = zarr.open_group(filename, storage_options=fs.storage_options)
+    data = group["0"]
 
-    def loader(filename: str, fs):
-        store = s3fs.S3Map(root=filename, s3=fs, check=False)
-        group = zarr.group(store=store)
-        data = group["0"]
+    def loader(data):
         chunks = data.chunks
         len(data[0:chunks[0], 0:chunks[1], 0:chunks[2], 0:chunks[3], 0:chunks[4]])
 
-    benchmark(loader, *method(f"{BASE}.ome.zarr"))
+    benchmark(loader, data)
 
 
 @pytest.mark.parametrize("method", (local, http, s3))
