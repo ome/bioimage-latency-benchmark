@@ -1,30 +1,50 @@
-How to use this repository
---------------------------
+# How to use this repository
 
-Clone this repository:
+To get started, clone this repository locally:
 ```
 git clone https://github.com/ome/ngff-latency-benchmark.git
 cd ngff-latency-benchmark
 ```
 
+## Generate sample data
+
+You will likely want to adjust the parameters in `.env` first, then run:
+
+```
+./generate.sh
+```
+
+which will run several docker-compose commands in a row. This could take
+a substantial amount of time depending on your parameters.
+
+## Or, alternatively download a sample file
+
+```
+mkdir data
+cd data
+../retina.sh
+```
+
+If you choose to use `retina_large`, you will also need to adjust the parameters in `.env`.
+
+
+## Then, start S3 and upload the data
+
 Start the various Docker containers.
 ```
-docker-compose up
+docker-compose up -d
 ```
 
-Open a new terminal and go to ``ngff-latency-benchmark``
-
-Create a conda environment using [environment.yml](environment.yml) file.
+Once the containers are up, run:
 ```
-conda env create -n ngff-latency-benchmark -f environment.yml
-```
-Activate the conda environment 
-```
-conda activate ngff-latency-benchmarking
+docker-compose run --rm upload
 ```
 
-Go the ``data`` directory and run the [setup.sh](setup.sh) script to generate the various imaging testing files from an IMARIS file.
+## Finally, run the benchmark
+
 ```
-cd data
-../setup.sh
+docker-compose run --rm benchmark -sv
 ```
+
+This will store both the benchmarking results ('benchmark_data.json') as well as a plotted graph
+('benchmark_plot.png') in the directory along with the input data.
