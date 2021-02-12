@@ -16,9 +16,14 @@ print('base_path', json_path)
 
 named_data = defaultdict(list)
 
+
+test_repeats = int(os.getenv('TEST_REPEATS'))
+json_files = ["%s_benchmark_data.json" % r for r in range(test_repeats)]
+print('json_files', json_files)
+
 for root, dirs, files in os.walk(json_path):
     for file_name in files:
-        if file_name.endswith("_benchmark_data.json"):
+        if file_name in json_files:
             path = os.path.join(root, file_name)
             print('json path', path)
             with open(path) as json_file:
@@ -26,7 +31,12 @@ for root, dirs, files in os.walk(json_path):
 
                 for bm in benchmarks:
                     label = bm['name'].replace('test_', '')
-                    named_data[label].append(bm['stats']['mean'])
+                    if test_repeats == 1:
+                        # Ran tests once: plot every data point
+                        named_data[label] = bm['stats']['data']
+                    else:
+                        # Repeats: take mean value from each
+                        named_data[label].append(bm['stats']['mean'])
 
 
 # print(named_data.keys())
@@ -62,7 +72,7 @@ def get_color(label):
 colors = [get_color(label) for label in labels]
 
 fig1, ax1 = plt.subplots(figsize=(10, 5), dpi=100)
-ax1.set_title(f'ngff benchmark ({xy}x{xy})')
+ax1.set_title(f'ngff benchmark ({xy}x{xy}) n={test_repeats}')
 boxplot = ax1.boxplot(
     data,
     labels=labels,

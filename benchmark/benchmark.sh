@@ -10,7 +10,7 @@ set -x
 
 cd /benchmark  # TODO: should work without docker
 
-for i in 0{..${TEST_REPEATS}}
+for (( i=0; i<$TEST_REPEATS; i++ ))
 do
     pytest benchmark.py "$@" --benchmark-json=${BENCHMARK_DATA}/${i}_benchmark_data.json
 done

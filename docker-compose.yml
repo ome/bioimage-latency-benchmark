@@ -49,6 +49,7 @@ services:
       - BASE
       - DIR
       - HOST
+      - TEST_REPEATS
 
 # from:   https://docs.min.io/docs/deploy-minio-on-docker-compose.html
 
