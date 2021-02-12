@@ -110,8 +110,8 @@ services:
   minio4:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
     volumes:
-      - "$ROOT}/data4-1:/data1"
-      - "$ROOT}/data4-2:/data2"
+      - "${ROOT}/data4-1:/data1"
+      - "${ROOT}/data4-2:/data2"
     expose:
       - "9000"
     environment:
