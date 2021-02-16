@@ -30,7 +30,7 @@ If you choose to use `retina_large`, you will also need to adjust the parameters
 
 ## Then, start S3 and upload the data
 
-Start the various Docker containers.
+Start the various Docker containers in the background ("detached" mode):
 ```
 docker-compose up -d
 ```
