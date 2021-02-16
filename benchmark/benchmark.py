@@ -73,7 +73,11 @@ def test_zarr_chunk(benchmark, method):
     class ZarrFixture(Fixture):
 
         def setup(self):
-            self.group = zarr.open_group(filename, storage_options=fs.storage_options)
+            store = zarr.storage.FSStore(
+                filename,
+                key_separator="/",
+                **fs.storage_options)
+            self.group = zarr.group(store=store)
 
         def run(self):
             data = self.group["0"]
