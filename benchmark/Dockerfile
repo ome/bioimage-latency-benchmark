@@ -12,5 +12,6 @@ COPY plot_results.py /benchmarks/plot_results.py
 # see https://github.com/zarr-developers/zarr-python/pull/699
 RUN conda run -n benchmark pip install git+https://github.com/joshmoore/zarr-python@key-sep#egg=zarr
 RUN conda run -n benchmark pip install pytest-profiling
+RUN conda run -n benchmark pip install seaborn
 
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "benchmark", "bash", "/benchmark/benchmark.sh"]

@@ -61,14 +61,35 @@ for root, dirs, files in os.walk(json_path):
                             }
                         )
 
+
 df = pd.DataFrame.from_dict(named_data)
-sns.set(style="ticks", palette="colorblind")
-g = sns.FacetGrid(df, col="source", size=8, aspect=0.5)
-g = g.map(sns.violinplot, "type", "milliseconds",
-#          inner=None, linewidth=1,
-#          scale="area", split=True, width=0.75
-)
-g.set(yscale ='log', ylim=(0.000001, 1))
-g.despine(left=True)
-g.add_legend(title="Latency")
+
+types = ("overhead", "zarr", "tiff", "hdf5")
+sns.set(context="paper", palette="colorblind", style="ticks")
+g = sns.FacetGrid(df, col="source", sharey=False, size=6, aspect=.5)
+g = g.map(sns.violinplot, "type", "milliseconds", cut=0,
+          inner="point", split=True,
+          order=types,
+          saturation=1).despine(left=True)
+g.set(yscale ='log', ylim=(0.00001, 1))
+# Set axis labels & ticks #
+g.fig.get_axes()[0].set_xlabel("Local")
+g.fig.get_axes()[1].set_xlabel("Remote")
+g.fig.get_axes()[2].set_xlabel("Object")
+g.fig.get_axes()[0].set_xticklabels(types)
+g.fig.get_axes()[1].set_xticklabels(types)
+g.fig.get_axes()[0].set_ylabel("Milliseconds")
+#g.fig.get_axes()[0].set_yticks(range(0, 80, 10))
+#g.fig.get_axes()[1].set_yticks([])
+g.fig.get_axes()[0].spines["left"].set_visible(True)
+# Set legend #
+#handles, labels = g.fig.get_axes()[0].get_legend_handles_labels()
+#g.fig.get_axes()[0].legend([handles[1]], ["Non-smoker"], loc='upper left')
+# Fixing titles #
+g.fig.get_axes()[0].set_title("")
+g.fig.get_axes()[1].set_title("")
+#g.plt.show()
+
+
+
 g.savefig(plot_path)
