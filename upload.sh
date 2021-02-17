@@ -14,8 +14,4 @@ mc config host add benchmark http://minio1:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECR
 mc mb -p benchmark/data
 mc policy set public benchmark/data
 
-cd $DIR
-mc cp -r *.ims benchmark/data/
-mc cp -r *.tiff benchmark/data/
-mc cp -r *.zarr benchmark/data/
-mc cp -r 1-byte benchmark/data/
+time mc mirror --overwrite ${DIR} benchmark/data/

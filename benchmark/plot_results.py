@@ -18,8 +18,8 @@ xy = os.environ.get("XY", "unknown")
 print('base_path', json_path)
 
 
-named_data = []
-
+three_col = []
+two_col = []
 
 test_repeats = int(os.getenv('TEST_REPEATS', "1"))
 json_files = ["%s_benchmark_data.json" % r for r in range(test_repeats)]
@@ -40,56 +40,89 @@ for root, dirs, files in os.walk(json_path):
                     typ = m.group(1).replace("1_byte", "overhead")
                     src = m.group(3)
                     
+                    if typ == "overhead" and src == "local":
+                        # 10e-5 skews the view.
+                        continue
+
                     if test_repeats == 1:
                         # Ran tests once: plot every data point
                         vals = bm['stats']['data']
                         for run, val in enumerate(vals):
-                            named_data.append(
+                            three_col.append(
                                 {
                                     "type": typ,
                                     "source": src,
-                                    "milliseconds": val,
+                                    "seconds": val,
                                 }
-                        )
+                            )
+                            two_col.append(
+                                {
+                                    "name": f"{typ}-{src}",
+                                    "seconds": val,
+                                }
+                            )
                     else:
                         # Repeats: take mean value from each
-                        named_data.append(
+                        val = bm['stats']['mean']
+                        three_col.append(
                             {
                                 "type": typ,
                                 "source": src,
-                                "milliseconds": bm['stats']['mean'],
+                                "seconds": val,
+                            }
+                        )
+                        two_col.append(
+                            {
+                                "name": f"{typ}-{src}",
+                                "seconds": val,
                             }
                         )
 
+df3 = pd.DataFrame.from_dict(three_col)
+df2 = pd.DataFrame.from_dict(two_col)
 
-df = pd.DataFrame.from_dict(named_data)
 
 types = ("overhead", "zarr", "tiff", "hdf5")
+sources = ("local", "http", "s3")
+orders = {"type": types, "source": sources}
+
 sns.set(context="paper", palette="colorblind", style="ticks")
-g = sns.FacetGrid(df, col="source", sharey=False, size=6, aspect=.5)
-g = g.map(sns.violinplot, "type", "milliseconds", cut=0,
-          inner="point", split=True,
-          order=types,
-          saturation=1).despine(left=True)
-g.set(yscale ='log', ylim=(0.00001, 1))
+pal_points = "colorblind"
+pal_violins = "pastel"
+
+g = sns.FacetGrid(
+    df3,
+    col="source", col_order=sources,
+    sharey=False, height=6, aspect=0.66,
+)
+
+g = g.map(
+    sns.boxenplot, "type", "seconds",
+    order=types, width=0.4, k_depth=2,
+    palette=pal_violins, dodge=True,
+)
+
+g = g.map(
+    sns.stripplot, "type", "seconds",
+    dodge=True,
+    order=types,
+    palette=pal_points,
+)
+
+g.despine(left=True)
+g.set(yscale ='log', ylim=(0.001, 1))
+
 # Set axis labels & ticks #
-g.fig.get_axes()[0].set_xlabel("Local")
-g.fig.get_axes()[1].set_xlabel("Remote")
-g.fig.get_axes()[2].set_xlabel("Object")
-g.fig.get_axes()[0].set_xticklabels(types)
-g.fig.get_axes()[1].set_xticklabels(types)
-g.fig.get_axes()[0].set_ylabel("Milliseconds")
-#g.fig.get_axes()[0].set_yticks(range(0, 80, 10))
-#g.fig.get_axes()[1].set_yticks([])
+for idx in range(3):
+    label = g.fig.get_axes()[idx].get_title().replace("source =", "")
+    g.fig.get_axes()[idx].set_xlabel(label)
+    g.fig.get_axes()[idx].set_xticklabels(types)
+    g.fig.get_axes()[idx].set_title("")
+    for violin in range(8):
+        # Remove outline of violins
+        g.fig.get_axes()[idx].collections[violin].set_edgecolor("white")
+
+g.fig.get_axes()[0].set_ylabel("Seconds")
 g.fig.get_axes()[0].spines["left"].set_visible(True)
-# Set legend #
-#handles, labels = g.fig.get_axes()[0].get_legend_handles_labels()
-#g.fig.get_axes()[0].legend([handles[1]], ["Non-smoker"], loc='upper left')
-# Fixing titles #
-g.fig.get_axes()[0].set_title("")
-g.fig.get_axes()[1].set_title("")
-#g.plt.show()
 
-
-
-g.savefig(plot_path)
+g.savefig(plot_path, dpi=300)
