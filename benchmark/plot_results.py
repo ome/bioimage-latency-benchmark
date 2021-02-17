@@ -81,48 +81,59 @@ for root, dirs, files in os.walk(json_path):
 df3 = pd.DataFrame.from_dict(three_col)
 df2 = pd.DataFrame.from_dict(two_col)
 
-
 types = ("overhead", "zarr", "tiff", "hdf5")
 sources = ("local", "http", "s3")
 orders = {"type": types, "source": sources}
 
-sns.set(context="paper", palette="colorblind", style="ticks")
 pal_points = "colorblind"
 pal_violins = "pastel"
 
 g = sns.FacetGrid(
     df3,
-    col="source", col_order=sources,
-    sharey=False, height=6, aspect=0.66,
+    col="source",
+    col_order=sources,
+    sharey=False,
+    height=5,
+    aspect=0.6,
 )
 
 g = g.map(
-    sns.boxenplot, "type", "seconds",
-    order=types, width=0.4, k_depth=2,
-    palette=pal_violins, dodge=True,
+    sns.boxenplot,
+    "type",
+    "seconds",
+    order=types,
+    width=0.6,
+    k_depth=2,
+    palette=pal_violins,
+    dodge=True,
+    showfliers=False,
 )
 
 g = g.map(
-    sns.stripplot, "type", "seconds",
+    sns.stripplot,
+    "type",
+    "seconds",
     dodge=True,
     order=types,
+    jitter=0.2,
+    size=3,
     palette=pal_points,
 )
 
 g.despine(left=True)
-g.set(yscale ='log', ylim=(0.001, 1))
+g.set(yscale ='log', ylim=(0.0009, 1))
 
 # Set axis labels & ticks #
-for idx in range(3):
-    label = g.fig.get_axes()[idx].get_title().replace("source =", "")
-    g.fig.get_axes()[idx].set_xlabel(label)
-    g.fig.get_axes()[idx].set_xticklabels(types)
-    g.fig.get_axes()[idx].set_title("")
-    for violin in range(8):
+for ax in g.fig.get_axes():
+    label = ax.get_title().replace("source =", "")
+    ax.set_xlabel(label)
+    ax.set_xticklabels(types)
+    ax.set_title("")
+    for col in ax.collections:
         # Remove outline of violins
-        g.fig.get_axes()[idx].collections[violin].set_edgecolor("white")
+        col.set_edgecolor("white")
 
 g.fig.get_axes()[0].set_ylabel("Seconds")
 g.fig.get_axes()[0].spines["left"].set_visible(True)
 
-g.savefig(plot_path, dpi=300)
+g.savefig(plot_path, dpi=600)
