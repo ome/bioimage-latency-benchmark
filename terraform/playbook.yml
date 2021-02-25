@@ -1,21 +1,64 @@
 - hosts: servers
-  roles:
-  - role: ome.nginx_proxy
 
-  vars:
-    nginx_proxy_direct_locations:
-    - location: "/"
-      root: "/data"
+  pre_tasks:
+  - ansible.builtin.user:
+      name: nginx
+
+  roles:
+  - role: nginxinc.nginx
+  - role: nginxinc.nginx_config
+    nginx_config_cleanup: true
+    nginx_config_main_template_enable: true
+    nginx_config_http_template:
+      - template_file: http/default.conf.j2
+        conf_file_name: data.conf
+        conf_file_location: /etc/nginx/conf.d/
+        servers:
+          - listen:
+              - port: 80
+            server_name: localhost
+            error_page: /usr/share/nginx/html
+            access_log: "off"
+            autoindex: false
+            locations:
+              - location: /
+                root: /data
+                autoindex: true
+            http_demo_conf: false
 
 - hosts: clients
 
-  roles:
-    - role: ome.docker
-      docker_use_ipv4_nic_mtu: True
-
   tasks:
-  - name: install docker-python
-    become: yes
-    yum:
-      name: docker-python
-      state: present
+
+    - apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+    - apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - apt: update_cache=yes name=docker-ce state=latest
+
+    # pip: name=docker FIXME
+
+    - get_url:
+        url : "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-Linux-x86_64"
+        dest: /usr/local/bin/docker-compose
+        mode: 'a+x'
+        force: yes
+
+    - ansible.builtin.git:
+        repo: 'https://github.com/ome/ngff-latency-benchmark'
+        dest: 'ngff-latency-benchmark'
+
+    - docker_image:
+        name: "continuumio/miniconda3"
+        source: pull
+
+    - apt: name=awscli state=present

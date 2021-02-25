@@ -1,13 +1,8 @@
 ---
 
-- src: ome.docker
-  version: 3.1.1
+- src: nginxinc.nginx
+  version: 0.19.1
 
-- src: ome.docker_tools
-  version: 1.0.1
+- src: nginxinc.nginx_config
+  version: 0.3.2
 
-- src: ome.nginx
-  version: 2.1.1
-
-- src: ome.nginx_proxy
-  version: 1.15.1
