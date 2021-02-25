@@ -1,16 +1,73 @@
 version: '3.7'
 
+services:
+
+# one-off containers: The following services are intended for use during
+# data preparation.
+
+  generate:
+    build: generate
+    stdin_open: true
+    tty: true
+    command: ["true"]
+    volumes:
+      - "${DIR}:${DIR}"
+
+  convert:
+    build: convert
+    stdin_open: true
+    tty: true
+    command: ["true"]
+    volumes:
+      - "${DIR}:${DIR}"
+
+  upload:
+    build: benchmark
+    stdin_open: true
+    tty: true
+    entrypoint: ["conda", "run", "-n", "benchmark", "bash", "/tmp/upload.sh"]
+    volumes:
+      - "${DIR}:${DIR}:ro"
+      - "./upload.sh:/tmp/upload.sh"
+    environment:
+      - BASE
+      - DIR
+      - HOST
+      - MINIO_ACCESS_KEY
+      - MINIO_SECRET_KEY
+
+  benchmark:
+    build: benchmark
+    stdin_open: true
+    tty: true
+    command: ["true"]
+    volumes:
+      - "${DIR}:${DIR}"
+      - "./benchmark:/benchmark:ro"
+    environment:
+      - XY
+      - Z
+      - C
+      - T
+      - XC
+      - ZC
+      - BASE
+      - DIR
+      - HOST
+      - ROUNDS
+      - TEST_REPEATS
+
 # from:   https://docs.min.io/docs/deploy-minio-on-docker-compose.html
 
 # starts 4 docker containers running minio server instances.
 # using nginx reverse proxy, load balancing, you can access
 # it through port 9000.
-services:
+
   minio1:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
     volumes:
-      - data1-1:/data1
-      - data1-2:/data2
+      - "${ROOT}/data1-1:/data1"
+      - "${ROOT}/data1-2:/data2"
     expose:
       - "9000"
     environment:
@@ -26,8 +83,8 @@ services:
   minio2:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
     volumes:
-      - data2-1:/data1
-      - data2-2:/data2
+      - "${ROOT}/data2-1:/data1"
+      - "${ROOT}/data2-2:/data2"
     expose:
       - "9000"
     environment:
@@ -43,8 +100,8 @@ services:
   minio3:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
     volumes:
-      - data3-1:/data1
-      - data3-2:/data2
+      - "${ROOT}/data3-1:/data1"
+      - "${ROOT}/data3-2:/data2"
     expose:
       - "9000"
     environment:
@@ -60,8 +117,8 @@ services:
   minio4:
     image: minio/minio:RELEASE.2021-01-05T05-22-38Z
     volumes:
-      - data4-1:/data1
-      - data4-2:/data2
+      - "${ROOT}/data4-1:/data1"
+      - "${ROOT}/data4-2:/data2"
     expose:
       - "9000"
     environment:
@@ -78,7 +135,7 @@ services:
     image: nginx:1.19.2-alpine
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./data:/data:ro
+      - "${DIR}:/data:ro"
     ports:
       - "8000:8000"
       - "9000:9000"
@@ -87,15 +144,3 @@ services:
       - minio2
       - minio3
       - minio4
-
-## By default this config uses default local driver,
-## For custom volumes replace with volume driver configuration.
-volumes:
-  data1-1:
-  data1-2:
-  data2-1:
-  data2-2:
-  data3-1:
-  data3-2:
-  data4-1:
-  data4-2:

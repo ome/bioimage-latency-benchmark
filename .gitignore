@@ -2,4 +2,6 @@ __pycache__
 data/*.ims
 data/*.tiff
 data/*.zarr
-*.swp
+data/*.bfmemo
+data/tmp
+.swp
