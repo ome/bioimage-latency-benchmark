@@ -63,6 +63,22 @@ resource "aws_security_group" "security_group" {
   name        = "benchmarking_security_group"
   vpc_id      = aws_vpc.vpc.id
 
+  egress {
+    description = "Unsecured from internet"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "TLS from internet"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   ingress {
     description = "TLS from VPC"
     from_port   = 443
@@ -132,3 +148,10 @@ resource "aws_instance" "client_instance" {
   }
 }
 
+output "instance_dns_1" {
+  value = aws_instance.nginx_instance.public_dns
+}
+
+output "instance_dns_2" {
+  value = aws_instance.client_instance.public_dns
+}
