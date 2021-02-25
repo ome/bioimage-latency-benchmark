@@ -3,6 +3,9 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import pandas as pd
+import re
+import seaborn as sns
 from collections import defaultdict
 
 json_path = os.environ.get("BENCHMARK_DATA", "benchmark_data")
@@ -14,10 +17,11 @@ xy = os.environ.get("XY", "unknown")
 
 print('base_path', json_path)
 
-named_data = defaultdict(list)
 
+three_col = []
+two_col = []
 
-test_repeats = int(os.getenv('TEST_REPEATS'))
+test_repeats = int(os.getenv('TEST_REPEATS', "1"))
 json_files = ["%s_benchmark_data.json" % r for r in range(test_repeats)]
 print('json_files', json_files)
 
@@ -30,69 +34,106 @@ for root, dirs, files in os.walk(json_path):
                 benchmarks = json.load(json_file)['benchmarks']
 
                 for bm in benchmarks:
-                    label = bm['name'].replace('test_', '')
+                    m = re.match(r"test_(1_byte|\w+)_(\w+)\[(\w+)\]", bm['name'])
+                    if not m:
+                        raise Exception(bm['name'])
+                    typ = m.group(1).replace("1_byte", "overhead")
+                    src = m.group(3)
+                    
+                    if typ == "overhead" and src == "local":
+                        # 10e-5 skews the view.
+                        continue
+
                     if test_repeats == 1:
                         # Ran tests once: plot every data point
-                        named_data[label] = bm['stats']['data']
+                        vals = bm['stats']['data']
+                        for run, val in enumerate(vals):
+                            three_col.append(
+                                {
+                                    "type": typ,
+                                    "source": src,
+                                    "seconds": val,
+                                }
+                            )
+                            two_col.append(
+                                {
+                                    "name": f"{typ}-{src}",
+                                    "seconds": val,
+                                }
+                            )
                     else:
                         # Repeats: take mean value from each
-                        named_data[label].append(bm['stats']['mean'])
+                        val = bm['stats']['mean']
+                        three_col.append(
+                            {
+                                "type": typ,
+                                "source": src,
+                                "seconds": val,
+                            }
+                        )
+                        two_col.append(
+                            {
+                                "name": f"{typ}-{src}",
+                                "seconds": val,
+                            }
+                        )
 
+df3 = pd.DataFrame.from_dict(three_col)
+df2 = pd.DataFrame.from_dict(two_col)
 
-# print(named_data.keys())
-# ['1_byte_overhead[local]', '1_byte_overhead[http]', '1_byte_overhead[boto3]', '1_byte_overhead[s3]',
-# 'zarr_chunk[local]', 'zarr_chunk[http]', 'zarr_chunk[boto3]', 'zarr_chunk[s3]',
-# 'tiff_tile[local]', 'tiff_tile[http]', 'tiff_tile[s3]',
-# 'hdf5_chunk[local]', 'hdf5_chunk[http]', 'hdf5_chunk[s3]',
-# 'download_1[local]', 'download_1[http]', 'download_1[s3]',
-# 'download_2[local]', 'download_2[http]', 'download_2[boto3]', 'download_2[3fs]']
+types = ("overhead", "zarr", "tiff", "hdf5")
+sources = ("local", "http", "s3")
+orders = {"type": types, "source": sources}
 
-# plot [hdf5/tiff/zarr] for s3, remote, local
-to_plot = [
-    'hdf5_chunk[s3]', 'tiff_tile[s3]', 'zarr_chunk[s3]', '1_byte_overhead[s3]',
-    'hdf5_chunk[http]', 'tiff_tile[http]', 'zarr_chunk[http]', '1_byte_overhead[http]',
-    'hdf5_chunk[local]', 'tiff_tile[local]', 'zarr_chunk[local]', '1_byte_overhead[local]',
-]
-labels = [
-    'hdf5 (s3)', 'tiff (s3)', 'zarr (s3)', 'overhead (s3)',
-    'hdf5 (remote)', 'tiff (remote)', 'zarr (remote)', 'overhead (remote)',
-    'hdf5 (local)', 'tiff (local)', 'zarr (local]', 'overhead (local)',
-]
-data = [named_data[key] for key in to_plot]
+pal_points = "colorblind"
+pal_violins = "pastel"
 
-def get_color(label):
-    if 'hdf5' in label:
-        return 'blue'
-    elif 'tiff' in label:
-        return 'green'
-    elif 'overhead' in label:
-        return 'yellow'
-    else:
-        return 'pink'
-colors = [get_color(label) for label in labels]
+g = sns.FacetGrid(
+    df3,
+    col="source",
+    col_order=sources,
+    sharey=False,
+    height=5,
+    aspect=0.6,
+)
 
-fig1, ax1 = plt.subplots(figsize=(10, 5), dpi=100)
-ax1.set_title(f'ngff benchmark ({xy}x{xy}) n={test_repeats}')
-boxplot = ax1.boxplot(
-    data,
-    labels=labels,
-    positions=range(len(labels), 0, -1),  # reverse order
-    patch_artist=True,  # fill with color
-    # showfliers=False,
-    vert=False)
+g = g.map(
+    sns.boxenplot,
+    "type",
+    "seconds",
+    order=types,
+    width=0.6,
+    k_depth=2,
+    palette=pal_violins,
+    dodge=True,
+    showfliers=False,
+)
 
-for color, patch in zip(colors, boxplot['boxes']):
-    patch.set_facecolor(color)
-    patch.set_edgecolor('grey')
-for feature in ['caps', 'whiskers']:
-    for line in boxplot[feature]:
-        line.set_color('grey')
-for line in boxplot['means']:
-    line.set_color('black')
-for circle in boxplot['fliers']:
-    circle.set_color('grey')
-ax1.set_xscale('log')
-ax1.set_xlabel('Chunk loading time (secs)')
+g = g.map(
+    sns.stripplot,
+    "type",
+    "seconds",
+    dodge=True,
+    order=types,
+    jitter=0.2,
+    size=3,
+    palette=pal_points,
+)
 
-plt.tight_layout()
-plt.savefig(plot_path)
+g.despine(left=True)
+g.set(yscale ='log', ylim=(0.0009, 1))
+
+# Set axis labels & ticks #
+for ax in g.fig.get_axes():
+    label = ax.get_title().replace("source =", "")
+    ax.set_xlabel(label)
+    ax.set_xticklabels(types)
+    ax.set_title("")
+    for col in ax.collections:
+        # Remove outline of violins
+        col.set_edgecolor("white")
+
+g.fig.get_axes()[0].set_ylabel("Seconds")
+g.fig.get_axes()[0].spines["left"].set_visible(True)
+
+g.savefig(plot_path, dpi=600)

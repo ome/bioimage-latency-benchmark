@@ -46,9 +46,15 @@ services:
       - "./benchmark:/benchmark:ro"
     environment:
       - XY
+      - Z
+      - C
+      - T
+      - XC
+      - ZC
       - BASE
       - DIR
       - HOST
+      - ROUNDS
       - TEST_REPEATS
 
 # from:   https://docs.min.io/docs/deploy-minio-on-docker-compose.html
