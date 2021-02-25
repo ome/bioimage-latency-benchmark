@@ -155,3 +155,13 @@ output "instance_dns_1" {
 output "instance_dns_2" {
   value = aws_instance.client_instance.public_dns
 }
+
+resource "local_file" "hosts_cfg" {
+  content = templatefile("${path.module}/hosts.tpl",
+    {
+      servers = aws_instance.nginx_instance.*.public_ip
+      clients = aws_instance.client_instance.*.public_ip
+    }
+  )
+  filename = "hosts.cfg"
+}
