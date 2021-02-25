@@ -9,7 +9,7 @@
 ## Run
 * Clone this repo and `cd` into the `terraform` directory.
 * Rename the files `tfbackend.config.example` and `terraform.tfvars.example` to remove the `.example` and edit them to have the correct values for your needs. The `bucket` in `tfbackend.config` should be the name of the bucket where you plan to store `.tfstate` files. In `terraform.tfvars`, `ssh_client_ip` should be the IP address you intend to SSH into your ec2 instances from, or `0.0.0.0/0` if you want to be able to SSH in from anywhere. `ssh_public_key` should be the public key of the `.pem` file you generated earlier. 
-* Initialize terraform by running `terraform init`.
+* Initialize terraform by running `terraform init --backend-config=tfbackend.config`.
 * Run `terraform plan` to make show you everything that will be created and confirm that this is correct.
 * Run `terraform apply`
 
