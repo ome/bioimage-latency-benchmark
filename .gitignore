@@ -4,3 +4,4 @@ data/*.tiff
 data/*.zarr
 data/*.bfmemo
 data/tmp
+.swp
