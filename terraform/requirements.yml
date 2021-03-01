@@ -6,3 +6,6 @@
 - src: nginxinc.nginx_config
   version: 0.3.2
 
+- src: community.docker
+  version: 1.2.2
+
