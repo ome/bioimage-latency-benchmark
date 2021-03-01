@@ -81,8 +81,8 @@ class Fixture:
 
     @staticmethod
     def s3(filename: str) -> str:
-        return f"s3://data/{filename}", s3fs.S3FileSystem(
-            anon=True, client_kwargs={"endpoint_url": f"http://{HOST}:9000"}, **fsspec_default_args)
+        return f"s3://ngff-latency-benchmark/1024-Z-1-T-1-C-3-XYC-128-ZC-1/{filename}", s3fs.S3FileSystem(
+            anon=False, **fsspec_default_args)
 
     def setup(self):
         pass
