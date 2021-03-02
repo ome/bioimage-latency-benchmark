@@ -147,7 +147,7 @@ resource "aws_key_pair" "ngffkey" {
 
 resource "aws_instance" "nginx_instance" {
     ami = data.aws_ami.latest-ubuntu.id
-    instance_type = "t2.micro"
+    instance_type = "t3.medium"
     subnet_id = aws_subnet.subnet.id
     vpc_security_group_ids = [aws_security_group.security_group.id]
     root_block_device {

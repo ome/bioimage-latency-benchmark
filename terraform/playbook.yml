@@ -1,4 +1,9 @@
 - hosts: all
+  vars:
+    # Should already be set for terraform
+    access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID')}}"
+    secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY')}}"
+
   tasks:
 
     - apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
@@ -24,6 +29,14 @@
         repo: 'https://github.com/ome/ngff-latency-benchmark'
         dest: 'ngff-latency-benchmark'
 
+    - ansible.builtin.command:
+        argv: ["aws", "configure", "set", "aws_access_key_id", "{{ access_key }}"]
+      tags: aws
+
+    - ansible.builtin.command:
+        argv: ["aws", "configure", "set", "aws_secret_access_key", "{{ secret_key }}"]
+      tags: aws
+
 - hosts: servers
   tasks:
 
@@ -32,3 +45,12 @@
         state: "present"
         services:
           - "nginx"
+
+- hosts: clients
+  tasks:
+
+    - docker_compose:
+        project_src: "ngff-latency-benchmark"
+        build: "yes"
+        services:
+          - "benchmark"
