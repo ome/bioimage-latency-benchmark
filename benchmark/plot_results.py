@@ -121,7 +121,7 @@ g = g.map(
 )
 
 g.despine(left=True)
-g.set(yscale ='log', ylim=(0.0009, 1))
+g.set(yscale ='log', ylim=(0.00001, 1.5))
 
 # Set axis labels & ticks #
 for ax in g.fig.get_axes():
