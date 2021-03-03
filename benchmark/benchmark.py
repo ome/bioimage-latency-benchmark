@@ -81,9 +81,7 @@ def chunk_choice(request):
 class Fixture:
     def __init__(self, src):
         self.src = src
-        self.choices = deepcopy(ChunkChoices())  # FIXME
-        for r in range(ROUNDS):
-            self.setup()
+        self.setup()
 
     def load(self, data, chunk_shape, chunk_index):
         X = list()  # eXtents
@@ -115,7 +113,7 @@ class Fixture:
         kwargs.update(S3ARGS)
         kwargs.update(fsspec_default_args)
         return (
-            f"s3://{BUCKET}/{filename}",
+            f"s3://{BUCKET}/{NAME}/{filename}",
             s3fs.S3FileSystem(**kwargs),
         )
 
