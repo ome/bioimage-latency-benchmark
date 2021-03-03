@@ -18,14 +18,16 @@ import fsspec
 
 DIR = environ.get("DIR", "data")
 BASE = environ.get("BASE", "retina_large")
-NAME = environ.get("BASE", "data")
+NAME = environ.get("NAME", "data")
 HOST = environ.get("HOST", "localhost")
 ROUNDS = int(environ.get("ROUNDS", 10))
 S3ARGS = json.loads(environ.get("S3ARGS", "{}"))
+BUCKET = environ.get("BUCKET", "ngff-latency-benchmark")
+
 
 fsspec_default_args = {
     "skip_instance_cache": False,
-    # "use_listings_cache": False}
+    # "use_listings_cache": False,
 }
 
 
@@ -41,7 +43,7 @@ class ChunkChoices:
         self.xy = int(environ.get("XY"))
         self.c = int(environ.get("C"))
         self.xc = int(environ.get("XC"))
-        chunk_indexes = list()
+        chunks = list()
         chunks_z = self.z // self.zc
         chunks_xy = self.xy // self.xc
         shape = (self.t, self.c, chunks_z, chunks_xy, chunks_xy)
@@ -56,30 +58,32 @@ class ChunkChoices:
                             chunk_distance += ic * prod(shape[2:])
                             chunk_distance += iz * prod(shape[3:])
                             chunk_distance += iy * prod(shape[4:])
-                            chunk_index.append(chunk_distance)
-                            chunk_indexes.append(tuple(chunk_index))
-        self.chunk_choices = random.sample(chunk_indexes, ROUNDS)
+                            chunks.append((chunk_index,
+                                          [chunk_distance, None]))
+
+        self.chunk_choices = list()
+        for idx, choice in enumerate(random.sample(chunks, ROUNDS)):
+            choice[1][1] = idx
+            self.chunk_choices.append(choice)
+
+    def __iter__(self):
+        return iter(self.chunk_choices)
 
     def pop(self):
         return self.chunk_choices.pop()
 
 
-CHOICES = ChunkChoices()
+@pytest.fixture(params=ChunkChoices(), ids=range(ROUNDS))
+def chunk_choice(request):
+    return request.param
 
 
 class Fixture:
-    def __init__(self, src, typ, record_property):
-        self.choices = deepcopy(CHOICES)
+    def __init__(self, src):
+        self.src = src
+        self.choices = deepcopy(ChunkChoices())  # FIXME
         for r in range(ROUNDS):
             self.setup()
-            start = time.time()
-            chunk_distance = self.run()
-            stop = time.time()
-            record_property("source", src.__name__)
-            record_property("type", typ)
-            record_property("seconds", (stop - start))
-            record_property("round", r)
-            record_property("chunk", chunk_distance)
 
     def load(self, data, chunk_shape, chunk_index):
         X = list()  # eXtents
@@ -111,96 +115,119 @@ class Fixture:
         kwargs.update(S3ARGS)
         kwargs.update(fsspec_default_args)
         return (
-            f"s3://data/{filename}",
+            f"s3://{BUCKET}/{filename}",
             s3fs.S3FileSystem(**kwargs),
         )
 
     def setup(self):
         pass
 
-    def run(self) -> int:
+    def run(self, chunk_index) -> int:
         """
         Calls load and returns the chunk distance.
         """
         raise NotImplementedError()
 
 
-@pytest.mark.parametrize("method", Fixture.methods())
-def test_1_byte_overhead(method, record_property):
 
-    filename, fs = method("1-byte")
-
-    class ByteFixture(Fixture):
-        def setup(self):
-            self.f = fs.open(filename)
-
-        def run(self):
-            self.f.read()
-            return 0
-
-    ByteFixture(method, "overhead", record_property)
+@pytest.fixture(params=(Fixture.local, Fixture.http, Fixture.s3),
+                ids=("local", "http", "s3"))
+def source(request):
+    return request.param
 
 
-@pytest.mark.parametrize("method", Fixture.methods())
-def test_zarr_chunk(method, record_property):
+@pytest.fixture(params=("overhead", "zarr", "tiff", "hdf5"))
+def file_type(request, source):
 
-    filename, fs = method(f"{BASE}.ome.zarr")
+    if request.param == "overhead":
 
-    class ZarrFixture(Fixture):
-        def setup(self):
-            store = zarr.storage.FSStore(
-                filename, key_separator="/", **fs.storage_options
-            )
-            self.group = zarr.group(store=store)
+        filename, fs = source("1-byte")
 
-        def run(self):
-            data = self.group["0"]
-            chunks = data.chunks
-            return self.load(data, chunks, self.choices.pop())
+        class Overhead(Fixture):
+            def setup(self):
+                self.f = fs.open(filename)
 
-    ZarrFixture(method, "zarr", record_property)
+            def run(self, chunk_index):
+                self.f.read()
+                return 0
 
+        return Overhead(source)
 
-@pytest.mark.parametrize("method", Fixture.methods())
-def test_tiff_tile(method, record_property):
+    elif request.param == "zarr":
 
-    filename, fs = method(f"{BASE}.ome.tiff")
+        filename, fs = source(f"{BASE}.ome.zarr")
 
-    class TiffFixture(Fixture):
-        def setup(self):
-            self.f = fs.open(filename)
+        class Zarr(Fixture):
+            def setup(self):
+                store = zarr.storage.FSStore(
+                    filename, key_separator="/", **fs.storage_options
+                )
+                self.group = zarr.group(store=store)
 
-        def run(self):
-            with tifffile.TiffFile(self.f) as tif:
-                store = tif.aszarr()
-                try:
-                    group = zarr.group(store=store)
-                    data = group["0"]
-                except KeyError:
-                    # This likely happens due to dim
-                    data = zarr.open(store, mode="r")
+            def run(self, chunk_index):
+                data = self.group["0"]
                 chunks = data.chunks
-                return self.load(data, chunks, self.choices.pop())
+                return self.load(data, chunks, chunk_index)
 
-    TiffFixture(method, "tiff", record_property)
+        return Zarr(source)
 
+    elif request.param == "tiff":
 
-@pytest.mark.parametrize("method", Fixture.methods())
-def test_hdf5_chunk(method, record_property):
+        filename, fs = source(f"{BASE}.ome.tiff")
 
-    filename, fs = method(f"{BASE}.ims")
+        class TIFF(Fixture):
+            def setup(self):
+                self.f = fs.open(filename)
 
-    class HDF5Fixture(Fixture):
-        def setup(self):
-            self.f = fs.open(filename)
-            self.file = h5py.File(self.f)
+            def run(self, chunk_index):
+                with tifffile.TiffFile(self.f) as tif:
+                    store = tif.aszarr()
+                    try:
+                        group = zarr.group(store=store)
+                        data = group["0"]
+                    except KeyError:
+                        # This likely happens due to dim
+                        data = zarr.open(store, mode="r")
+                    chunks = data.chunks
+                    return self.load(data, chunks, chunk_index)
 
-        def run(self):
-            t, c, *idx = self.choices.pop()
-            data = self.file["DataSet"]["ResolutionLevel 0"][f"TimePoint {t-1}"][
-                f"Channel {c-1}"
-            ]["Data"]
-            chunks = data.chunks
-            return self.load(data, chunks, idx)
+        return TIFF(source)
 
-    HDF5Fixture(method, "hdf5", record_property)
+    elif request.param == "hdf5":
+
+        filename, fs = source(f"{BASE}.ims")
+
+        class HDF5(Fixture):
+            def setup(self):
+                self.f = fs.open(filename)
+                self.file = h5py.File(self.f)
+
+            def run(self, chunk_index):
+                t, c, *idx = chunk_index
+                data = self.file["DataSet"]["ResolutionLevel 0"][f"TimePoint {t-1}"][
+                    f"Channel {c-1}"
+                ]["Data"]
+                chunks = data.chunks
+                return self.load(data, chunks, idx)
+
+        return HDF5(source)
+
+    else:
+
+        raise NotImplementedError(request.param)
+
+def test_benchmark(file_type, chunk_choice, record_property):
+
+    chunk_index, chunk_meta = chunk_choice
+    chunk_distance, chunk_record = chunk_meta
+
+    start = time.time()
+    file_type.run(chunk_index)
+    stop = time.time()
+
+    record_property("source", file_type.src.__name__)
+    record_property("type", file_type.__class__.__name__)
+    record_property("seconds", (stop - start))
+    record_property("round", chunk_record)
+    record_property("chunk_index", chunk_index)
+    record_property("chunk_distance", chunk_distance)

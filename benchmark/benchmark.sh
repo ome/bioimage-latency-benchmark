@@ -13,7 +13,7 @@ cd /benchmark  # TODO: should work without docker
 for (( i=0; i<$TEST_REPEATS; i++ ))
 do
     pytest benchmark.py "$@" --csv=${BENCHMARK_DATA}/${i}_benchmark_data.csv \
-        --csv-columns parameters_as_columns,properties_as_columns
+        --csv-columns status,duration,properties_as_columns,markers_args_as_columns
     head ${BENCHMARK_DATA}/${i}_benchmark_data.csv
 done
 
