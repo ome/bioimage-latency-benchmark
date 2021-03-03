@@ -13,5 +13,6 @@ COPY plot_results.py /benchmarks/plot_results.py
 RUN conda run -n benchmark pip install git+https://github.com/zarr-developers/zarr-python@master#egg=zarr
 RUN conda run -n benchmark pip install pytest-profiling
 RUN conda run -n benchmark pip install seaborn
+RUN conda run -n benchmark pip install pytest-csv
 
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "benchmark", "bash", "/benchmark/benchmark.sh"]

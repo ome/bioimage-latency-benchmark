@@ -39,7 +39,7 @@ for root, dirs, files in os.walk(json_path):
                         raise Exception(bm['name'])
                     typ = m.group(1).replace("1_byte", "overhead")
                     src = m.group(3)
-                    
+
                     if typ == "overhead" and src == "local":
                         # 10e-5 skews the view.
                         continue

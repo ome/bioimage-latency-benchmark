@@ -25,6 +25,10 @@ fsspec_default_args = {
 }
 
 
+def prod(seq):
+    return reduce(operator.mul, seq, 1)
+
+
 class ChunkChoices:
 
     def __init__(self):
@@ -35,12 +39,22 @@ class ChunkChoices:
         self.c = int(environ.get("C"))
         self.xc = int(environ.get("XC"))
         chunk_indexes = list()
-        for ix in range(self.xy // self.xc):
-            for iy in range(self.xy // self.xc):
-                for iz in range(self.z // self.zc):
+        chunks_z = self.z // self.zc
+        chunks_xy = self.xy // self.xc
+        shape = (self.t, self.c, chunks_z, chunks_xy, chunks_xy)
+        for ix in range(chunks_xy):
+            for iy in range(chunks_xy):
+                for iz in range(chunks_z):
                     for ic in range(self.c):
                         for it in range(self.t):
-                            chunk_indexes.append((it+1, ic+1, iz+1, iy+1, ix+1))
+                            chunk_index = [it+1, ic+1, iz+1, iy+1, ix+1]
+                            chunk_distance = ix
+                            chunk_distance += it * prod(shape[1:])
+                            chunk_distance += ic * prod(shape[2:])
+                            chunk_distance += iz * prod(shape[3:])
+                            chunk_distance += iy * prod(shape[4:])
+                            chunk_index.append(chunk_distance)
+                            chunk_indexes.append(tuple(chunk_index))
         self.chunk_choices = random.sample(chunk_indexes, ROUNDS)
 
     def pop(self):
@@ -52,12 +66,18 @@ CHOICES = ChunkChoices()
 
 class Fixture:
 
-    def __init__(self, benchmark):
+    def __init__(self, src, typ, record_property):
         self.choices = deepcopy(CHOICES)
-        benchmark.pedantic(self.run, setup=self.setup, rounds=ROUNDS)
-
-    def prod(self, seq):
-        return reduce(operator.mul, seq, 1)
+        for r in range(ROUNDS):
+            self.setup()
+            start = time.time()
+            chunk_distance = self.run()
+            stop = time.time()
+            record_property('source', src.__name__)
+            record_property('type', typ)
+            record_property('seconds', (stop-start))
+            record_property('round', r)
+            record_property('chunk', chunk_distance)
 
     def load(self, data, chunk_shape, chunk_index):
             X = list()  # eXtents
@@ -65,7 +85,8 @@ class Fixture:
                 shape = chunk_shape[i]
                 index = chunk_index[i]
                 X.append(slice(shape*(index-1), shape*index))
-            return len(data[tuple(X)]) == self.prod(chunk_shape)
+            len(data[tuple(X)]) == prod(chunk_shape)
+            return chunk_index[-1]
 
     @classmethod
     def methods(cls):
@@ -87,12 +108,15 @@ class Fixture:
     def setup(self):
         pass
 
-    def run(self):
+    def run(self) -> int:
+        """
+        Calls load and returns the chunk distance.
+        """
         raise NotImplemented()
 
 
 @pytest.mark.parametrize("method", Fixture.methods())
-def test_1_byte_overhead(benchmark, method):
+def test_1_byte_overhead(method, record_property):
 
     filename, fs = method("1-byte")
 
@@ -103,13 +127,14 @@ def test_1_byte_overhead(benchmark, method):
 
         def run(self):
             self.f.read()
-        
-    ByteFixture(benchmark)
+            return 0
+
+    ByteFixture(method, "overhead", record_property)
 
 
 @pytest.mark.parametrize("method", Fixture.methods())
-def test_zarr_chunk(benchmark, method):
- 
+def test_zarr_chunk(method, record_property):
+
     filename, fs = method(f"{BASE}.ome.zarr")
 
     class ZarrFixture(Fixture):
@@ -124,13 +149,13 @@ def test_zarr_chunk(benchmark, method):
         def run(self):
             data = self.group["0"]
             chunks = data.chunks
-            self.load(data, chunks, self.choices.pop())
+            return self.load(data, chunks, self.choices.pop())
 
-    ZarrFixture(benchmark)
+    ZarrFixture(method, "zarr", record_property)
 
 
 @pytest.mark.parametrize("method", Fixture.methods())
-def test_tiff_tile(benchmark, method):
+def test_tiff_tile(method, record_property):
 
     filename, fs = method(f"{BASE}.ome.tiff")
 
@@ -142,16 +167,20 @@ def test_tiff_tile(benchmark, method):
         def run(self):
             with tifffile.TiffFile(self.f) as tif:
                 store = tif.aszarr()
-                group = zarr.group(store=store)
-                data = group["0"]
+                try:
+                    group = zarr.group(store=store)
+                    data = group["0"]
+                except:
+                    # This likely hapens due to dim
+                    data = zarr.open(store, mode='r')
                 chunks = data.chunks
-                self.load(data, chunks, self.choices.pop())
+                return self.load(data, chunks, self.choices.pop())
 
-    TiffFixture(benchmark)
+    TiffFixture(method, "tiff", record_property)
 
 
 @pytest.mark.parametrize("method", Fixture.methods())
-def test_hdf5_chunk(benchmark, method):
+def test_hdf5_chunk(method, record_property):
 
     filename, fs = method(f"{BASE}.ims")
 
@@ -165,6 +194,6 @@ def test_hdf5_chunk(benchmark, method):
             t, c, *idx = self.choices.pop()
             data = self.file["DataSet"]["ResolutionLevel 0"][f"TimePoint {t-1}"][f"Channel {c-1}"]["Data"]
             chunks = data.chunks
-            self.load(data, chunks, idx)
+            return self.load(data, chunks, idx)
 
-    HDF5Fixture(benchmark)
+    HDF5Fixture(method, "hdf5", record_property)
