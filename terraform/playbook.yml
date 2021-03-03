@@ -49,8 +49,6 @@
 - hosts: clients
   tasks:
 
-    - docker_compose:
-        project_src: "ngff-latency-benchmark"
-        build: "yes"
-        services:
-          - "benchmark"
+    - ansible.builtin.command:
+        chdir: ngff-latency-benchmark
+        argv: ["docker-compose", "build", "benchmark"]

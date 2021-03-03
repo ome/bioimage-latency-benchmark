@@ -151,7 +151,7 @@ resource "aws_instance" "nginx_instance" {
     subnet_id = aws_subnet.subnet.id
     vpc_security_group_ids = [aws_security_group.security_group.id]
     root_block_device {
-        volume_size = 128
+        volume_size = 256
     }
     key_name = aws_key_pair.ngffkey.key_name
   tags = {
@@ -165,7 +165,7 @@ resource "aws_instance" "client_instance" {
     subnet_id = aws_subnet.subnet.id
     vpc_security_group_ids = [aws_security_group.security_group.id]
     root_block_device {
-        volume_size = 128
+        volume_size = 256
     }
     key_name = aws_key_pair.ngffkey.key_name
   tags = {
