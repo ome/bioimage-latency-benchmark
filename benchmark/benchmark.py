@@ -1,27 +1,31 @@
-import time
-import fsspec
-import h5py
-import pytest
+import operator
 import random
-import requests
-import s3fs
-import tifffile
-import zarr
+import time
 from copy import deepcopy
-from os import environ
 
 # for product
 from functools import reduce  # Required in Python 3
-import operator
+from os import environ
+
+import h5py
+import json
+import pytest
+import s3fs
+import tifffile
+import zarr
+
+import fsspec
 
 DIR = environ.get("DIR", "data")
 BASE = environ.get("BASE", "retina_large")
+NAME = environ.get("BASE", "data")
 HOST = environ.get("HOST", "localhost")
 ROUNDS = int(environ.get("ROUNDS", 10))
+S3ARGS = json.loads(environ.get("S3ARGS", "{}"))
 
 fsspec_default_args = {
     "skip_instance_cache": False,
-    #"use_listings_cache": False}
+    # "use_listings_cache": False}
 }
 
 
@@ -30,7 +34,6 @@ def prod(seq):
 
 
 class ChunkChoices:
-
     def __init__(self):
         self.z = int(environ.get("Z"))
         self.t = int(environ.get("T"))
@@ -47,7 +50,7 @@ class ChunkChoices:
                 for iz in range(chunks_z):
                     for ic in range(self.c):
                         for it in range(self.t):
-                            chunk_index = [it+1, ic+1, iz+1, iy+1, ix+1]
+                            chunk_index = [it + 1, ic + 1, iz + 1, iy + 1, ix + 1]
                             chunk_distance = ix
                             chunk_distance += it * prod(shape[1:])
                             chunk_distance += ic * prod(shape[2:])
@@ -65,7 +68,6 @@ CHOICES = ChunkChoices()
 
 
 class Fixture:
-
     def __init__(self, src, typ, record_property):
         self.choices = deepcopy(CHOICES)
         for r in range(ROUNDS):
@@ -73,20 +75,20 @@ class Fixture:
             start = time.time()
             chunk_distance = self.run()
             stop = time.time()
-            record_property('source', src.__name__)
-            record_property('type', typ)
-            record_property('seconds', (stop-start))
-            record_property('round', r)
-            record_property('chunk', chunk_distance)
+            record_property("source", src.__name__)
+            record_property("type", typ)
+            record_property("seconds", (stop - start))
+            record_property("round", r)
+            record_property("chunk", chunk_distance)
 
     def load(self, data, chunk_shape, chunk_index):
-            X = list()  # eXtents
-            for i in range(len(chunk_shape)):  # zarr=5, HDF5=3
-                shape = chunk_shape[i]
-                index = chunk_index[i]
-                X.append(slice(shape*(index-1), shape*index))
-            len(data[tuple(X)]) == prod(chunk_shape)
-            return chunk_index[-1]
+        X = list()  # eXtents
+        for i in range(len(chunk_shape)):  # zarr=5, HDF5=3
+            shape = chunk_shape[i]
+            index = chunk_index[i]
+            X.append(slice(shape * (index - 1), shape * index))
+        len(data[tuple(X)]) == prod(chunk_shape)
+        return chunk_index[-1]
 
     @classmethod
     def methods(cls):
@@ -94,16 +96,24 @@ class Fixture:
 
     @staticmethod
     def local(filename: str) -> str:
-        return f"{DIR}/{filename}", fsspec.filesystem('file', **fsspec_default_args)
+        return f"{DIR}/{filename}", fsspec.filesystem("file", **fsspec_default_args)
 
     @staticmethod
     def http(filename: str) -> str:
-        return f"http://{HOST}:8000/{filename}", fsspec.filesystem('http', **fsspec_default_args)
+        return (
+            f"http://{HOST}:8000/{filename}",
+            fsspec.filesystem("http", **fsspec_default_args),
+        )
 
     @staticmethod
     def s3(filename: str) -> str:
-        return f"s3://ngff-latency-benchmark/2048-Z-1-T-1-C-3-XYC-256-ZC-1/{filename}", s3fs.S3FileSystem(
-            anon=False, **fsspec_default_args)
+        kwargs = dict()
+        kwargs.update(S3ARGS)
+        kwargs.update(fsspec_default_args)
+        return (
+            f"s3://data/{filename}",
+            s3fs.S3FileSystem(**kwargs),
+        )
 
     def setup(self):
         pass
@@ -112,7 +122,7 @@ class Fixture:
         """
         Calls load and returns the chunk distance.
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 @pytest.mark.parametrize("method", Fixture.methods())
@@ -121,7 +131,6 @@ def test_1_byte_overhead(method, record_property):
     filename, fs = method("1-byte")
 
     class ByteFixture(Fixture):
-
         def setup(self):
             self.f = fs.open(filename)
 
@@ -138,12 +147,10 @@ def test_zarr_chunk(method, record_property):
     filename, fs = method(f"{BASE}.ome.zarr")
 
     class ZarrFixture(Fixture):
-
         def setup(self):
             store = zarr.storage.FSStore(
-                filename,
-                key_separator="/",
-                **fs.storage_options)
+                filename, key_separator="/", **fs.storage_options
+            )
             self.group = zarr.group(store=store)
 
         def run(self):
@@ -160,7 +167,6 @@ def test_tiff_tile(method, record_property):
     filename, fs = method(f"{BASE}.ome.tiff")
 
     class TiffFixture(Fixture):
-
         def setup(self):
             self.f = fs.open(filename)
 
@@ -170,9 +176,9 @@ def test_tiff_tile(method, record_property):
                 try:
                     group = zarr.group(store=store)
                     data = group["0"]
-                except:
-                    # This likely hapens due to dim
-                    data = zarr.open(store, mode='r')
+                except KeyError:
+                    # This likely happens due to dim
+                    data = zarr.open(store, mode="r")
                 chunks = data.chunks
                 return self.load(data, chunks, self.choices.pop())
 
@@ -185,14 +191,15 @@ def test_hdf5_chunk(method, record_property):
     filename, fs = method(f"{BASE}.ims")
 
     class HDF5Fixture(Fixture):
-
-       def setup(self):
+        def setup(self):
             self.f = fs.open(filename)
             self.file = h5py.File(self.f)
 
-       def run(self):
+        def run(self):
             t, c, *idx = self.choices.pop()
-            data = self.file["DataSet"]["ResolutionLevel 0"][f"TimePoint {t-1}"][f"Channel {c-1}"]["Data"]
+            data = self.file["DataSet"]["ResolutionLevel 0"][f"TimePoint {t-1}"][
+                f"Channel {c-1}"
+            ]["Data"]
             chunks = data.chunks
             return self.load(data, chunks, idx)
 

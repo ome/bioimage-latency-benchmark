@@ -53,6 +53,7 @@ services:
       - XC
       - ZC
       - BASE
+      - NAME
       - DIR
       - HOST
       - ROUNDS
