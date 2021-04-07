@@ -1,0 +1,22 @@
+---
+name: Build
+
+on: 
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: ./generate.sh
+      - name: Start containers
+        run: docker-compose up -d
+      - name:  Upload data
+        run: docker-compose run --rm upload
+      - name: Run the benchmark
+        run: docker-compose run --rm benchmark -sv
