@@ -14,9 +14,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build
         run: ./generate.sh
-      - name: Start containers
-        run: docker-compose up -d
-      - name:  Upload data
-        run: docker-compose run --rm upload
-      - name: Run the benchmark
-        run: docker-compose run --rm benchmark -sv
+      - name: Start Upload and Run benchmark
+        run: ./test.sh
+      - name: Check logs
+        run: docker-compose logs
+        if: ${{ failure() }}
