@@ -9,8 +9,6 @@ COPY benchmark.sh /benchmark/benchmark.sh
 COPY benchmark.py /benchmark/benchmark.py
 COPY plot_results.py /benchmark/plot_results.py
 
-# see https://github.com/zarr-developers/zarr-python/pull/699
-RUN conda run -n benchmark pip install zarr  # >= 2.7.0
 RUN conda run -n benchmark pip install pytest-profiling
 RUN conda run -n benchmark pip install seaborn
 RUN conda run -n benchmark pip install pytest-csv

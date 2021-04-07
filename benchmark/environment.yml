@@ -13,7 +13,7 @@ dependencies:
   - scikit-image
   - scipy
   - xarray
-  - zarr >= 2.4.0
+  - zarr >= 2.7.0
   - go-mc
   - pip
   - pip:
