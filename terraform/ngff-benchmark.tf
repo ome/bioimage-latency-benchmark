@@ -47,7 +47,8 @@ resource "aws_route_table" "route_table" {
 resource "aws_subnet" "subnet" {
   vpc_id     = aws_vpc.vpc.id
   cidr_block = "10.0.1.0/24"
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = true 
+  availability_zone = "eu-west-1a"
 
   tags = {
     Name = "ngff-benchmarking-subnet"
@@ -62,6 +63,14 @@ resource "aws_route_table_association" "rt_association" {
 resource "aws_security_group" "security_group" {
   name        = "benchmarking_security_group"
   vpc_id      = aws_vpc.vpc.id
+
+  egress {
+    description = "Unsecured from internet"
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   egress {
     description = "Unsecured from internet"
@@ -80,6 +89,22 @@ resource "aws_security_group" "security_group" {
   }
 
   ingress {
+    description = "Unsecured from internet"
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Unsecured from VPC"
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.vpc.cidr_block]
+  }
+
+  ingress {
     description = "TLS from VPC"
     from_port   = 443
     to_port     = 443
@@ -92,7 +117,7 @@ resource "aws_security_group" "security_group" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${var.ssh_client_ip}"]
+    cidr_blocks = [var.ssh_client_ip]
   }
 
   tags = {
@@ -106,7 +131,7 @@ data "aws_ami" "latest-ubuntu" {
 
   filter {
       name   = "name"
-      values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+      values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
 
   filter {
@@ -117,16 +142,16 @@ data "aws_ami" "latest-ubuntu" {
 
 resource "aws_key_pair" "ngffkey" {
   key_name   = "ngff-key"
-  public_key = "${var.ssh_public_key}"
+  public_key = var.ssh_public_key
 }
 
 resource "aws_instance" "nginx_instance" {
-    ami = "${data.aws_ami.latest-ubuntu.id}"
-    instance_type = "t2.micro"
+    ami = data.aws_ami.latest-ubuntu.id
+    instance_type = "t3.medium"
     subnet_id = aws_subnet.subnet.id
     vpc_security_group_ids = [aws_security_group.security_group.id]
     root_block_device {
-        volume_size = 128
+        volume_size = 256
     }
     key_name = aws_key_pair.ngffkey.key_name
   tags = {
@@ -135,12 +160,12 @@ resource "aws_instance" "nginx_instance" {
 }
 
 resource "aws_instance" "client_instance" {
-    ami = "${data.aws_ami.latest-ubuntu.id}"
-    instance_type = "t2.micro"
+    ami = data.aws_ami.latest-ubuntu.id
+    instance_type = "t3.medium"
     subnet_id = aws_subnet.subnet.id
     vpc_security_group_ids = [aws_security_group.security_group.id]
     root_block_device {
-        volume_size = 128
+        volume_size = 256
     }
     key_name = aws_key_pair.ngffkey.key_name
   tags = {
@@ -154,4 +179,14 @@ output "instance_dns_1" {
 
 output "instance_dns_2" {
   value = aws_instance.client_instance.public_dns
+}
+
+resource "local_file" "hosts_cfg" {
+  content = templatefile("${path.module}/hosts.tpl",
+    {
+      servers = aws_instance.nginx_instance.*.public_ip
+      clients = aws_instance.client_instance.*.public_ip
+    }
+  )
+  filename = "hosts.cfg"
 }
