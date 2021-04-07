@@ -1,4 +1,6 @@
-# How to use this repository
+[![DOI](https://zenodo.org/badge/329595844.svg)](https://zenodo.org/badge/latestdoi/329595844)
+
+# OME-NGFF: latency benchmark
 
 To get started, clone this repository locally:
 ```
