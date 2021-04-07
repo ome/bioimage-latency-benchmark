@@ -34,10 +34,12 @@ cd lz4-dev
 make DESTDIR=../lz4-install install
 cd ..
 
+
 #imarisWriter
-wget -N -O ImarisWriter.zip https://github.com/dgault/ImarisWriter/archive/master.zip
+BRANCH=2021-04-07
+wget -N -O ImarisWriter.zip https://github.com/ome/ImarisWriter/archive/${BRANCH}.zip
 unzip ImarisWriter.zip
-mv ImarisWriter-master ImarisWriter
+mv ImarisWriter-${BRANCH} ImarisWriter
 cd ImarisWriter
 mkdir release
 cd release
@@ -45,8 +47,9 @@ cmake -DHDF5_ROOT:PATH="../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0" -DZLIB_ROOT:
 make install
 cd ../..
 
+
 #imarisWriterTest
-BRANCH=ngff-benchmark-gen
+BRANCH=2021-04-07
 wget -N -O ImarisWriterTest.zip https://github.com/dgault/ImarisWriterTest/archive/${BRANCH}.zip
 unzip ImarisWriterTest.zip
 mv ImarisWriterTest-${BRANCH} ImarisWriterTest
