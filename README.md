@@ -1,3 +1,6 @@
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ome/ngff-latency-benchmark/master?filepath=notebooks)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ome/ngff-latency-benchmark/)
+
 # How to use this repository
 
 To get started, clone this repository locally:
@@ -48,3 +51,4 @@ docker-compose run --rm benchmark -sv
 
 This will store both the benchmarking results ('benchmark_data.json') as well as a plotted graph
 ('benchmark_plot.png') in the directory along with the input data.
+
