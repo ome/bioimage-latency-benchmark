@@ -17,16 +17,6 @@ You will likely want to adjust the parameters in `.env` first, then run:
 which will run several docker-compose commands in a row. This could take
 a substantial amount of time depending on your parameters.
 
-## Or, alternatively download a sample file
-
-```
-mkdir data
-cd data
-../retina.sh
-```
-
-If you choose to use `retina_large`, you will also need to adjust the parameters in `.env`.
-
 
 ## Then, start S3 and upload the data
 
