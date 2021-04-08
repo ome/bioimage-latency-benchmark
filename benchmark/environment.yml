@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - joshmoore
   - defaults
+  - 
 dependencies:
   - python == 3.9.0
   - ipython
@@ -16,9 +17,10 @@ dependencies:
   - zarr >= 2.7.0
   - go-mc
   - pip
+  - boto3
+  - pytest-benchmark
+  - awscli
+  - pyqt
+  - botocore
   - pip:
-      - PyQT5==5.13.1
       - ome-zarr
-      - awscli
-      - pytest-benchmark
-      - boto3
