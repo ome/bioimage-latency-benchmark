@@ -49,7 +49,7 @@ cd ../..
 
 
 #imarisWriterTest
-BRANCH=ngff-benchmark-gen-gradient
+BRANCH=2021-04-08
 wget -N -O ImarisWriterTest.zip https://github.com/ome/ImarisWriterTest/archive/${BRANCH}.zip
 unzip ImarisWriterTest.zip
 mv ImarisWriterTest-${BRANCH} ImarisWriterTest
