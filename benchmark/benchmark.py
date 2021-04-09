@@ -180,7 +180,12 @@ def file_type(request, source):
             def run(self, chunk_index):
                 with tifffile.TiffFile(self.f) as tif:
                     store = tif.aszarr()
-                    data = zarr.open(store, mode="r")
+                    try:
+                        group = zarr.group(store=store)
+                        data = group["0"]
+                    except (KeyError, ValueError):
+                        # This likely happens due to dim
+                        data = zarr.open(store, mode="r")
                     chunks = data.chunks
                     return self.load(data, chunks, chunk_index)
 
