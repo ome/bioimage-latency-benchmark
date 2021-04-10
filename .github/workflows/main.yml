@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set env
+        run: |
+          rm .env
+          mv .env-gha .env
       - name: Build
         run: |
           docker-compose pull && docker-compose build
