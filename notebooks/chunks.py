@@ -20,7 +20,7 @@ def plot(ax, twoD=True):
     if twoD:
         shape = (1, 8, 1, 2 ** 16, 2 ** 16)
         chunkSizesXY = [32, 1024]
-        chunkSizesOther = (1, 5, 25)
+        chunkSizesOther = (1, 4, 8)
     else:
         shape = (100, 1, 1024, 1024, 1024)
         chunkSizesXY = (16, 32, 64, 128)
@@ -29,18 +29,19 @@ def plot(ax, twoD=True):
     ax.set_ylabel("Number of chunks")
     ax.set_yscale("log")
     ax.set_xscale("log")
+    ax.set(xlim=(10, 2 * 10 ** 3), ylim=(10, 10 ** 8))
 
     if twoD:
         ax.set_xlabel("Chunk size (X and Y)")
         ax.set_title("XYZCT: 64k x 64k x 1 x 8 x 1")
         chunkDim = "C"
-        annTitle = "Chosen chunk size\nC: 1, X: 256, Y: 256"
+        annTitle = "Chosen chunk size:\n256 x 256 x 1 x 1 x 1"
         xy = ((256), file_count(shape, 256))
     else:
         ax.set_xlabel("Chunk size (XYZ)")
         ax.set_title("XYZCT: 1k x 1k x 1k x 1 x 100")
         chunkDim = "T"
-        annTitle = "Chosen chunk size\nT: 1, X: 32, Y: 32, Z: 32"
+        annTitle = "Chosen chunk size:\n32 x 32 x 32 x 1 x 1"
         xy = ((32), file_count(shape, 32, chunkZ=32))
 
     for chunkOther in chunkSizesOther:
@@ -65,8 +66,8 @@ def plot(ax, twoD=True):
             xytext=(0, 40),
             textcoords="offset points",
             arrowprops=dict(facecolor="black", shrink=0.05),
-            horizontalalignment="center",
-            verticalalignment="bottom",
+            horizontalalignment="left",
+            verticalalignment="center",
         )
         ax.legend(loc="lower left", title=f"Chunk size ({chunkDim})", frameon=False)
 
@@ -83,7 +84,7 @@ if __name__ == "__main__":
     # ax3D = fig.add_subplot(2, 1, 2)
 
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-    plot(ax[0], True)
-    plot(ax[1], False)
+    plot(ax[1], True)
+    plot(ax[0], False)
 
     plt.savefig(ns.filename, dpi=ns.dpi)
