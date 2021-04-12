@@ -2,10 +2,13 @@ import json
 import os
 import re
 
+import matplotlib.collections as clt
+import matplotlib.pyplot as plt
 import pandas as pd
+import ptitprince as pt
 import seaborn as sns
 
-data_path = os.environ.get("BENCHMARK_DATA", "benchmark_data")
+data_path = os.environ.get("BENCHMARK_DATA", "./")
 plot_path = os.environ.get("BENCHMARK_PLOT", "benchmark_plot.png")
 xy = os.environ.get("XY", "unknown")
 
@@ -15,16 +18,39 @@ types = ("Overhead", "Zarr", "TIFF", "HDF5")
 sources = ("local", "http", "s3")
 orders = {"type": types, "source": sources}
 
+
+f, ax = plt.subplots(figsize=(8, 10))
+ax = pt.RainCloud(
+    x="type",
+    y="seconds",
+    hue="source",
+    data=csv,
+    palette="Set2",
+    # bw = .2,
+    width_viol=0.4,
+    ax=ax,
+    # orient = "h",
+    alpha=0.65,
+    # dodge = True,
+    jitter=0.02,
+    move=0.2,
+    # pointplot = True,
+)
+
+# ax.set(ylim=(0.0002, 5))
+ax.set_yscale("log")
+ax.set_title("")
+handles, labels = ax.get_legend_handles_labels()
+plt.legend(handles[0:3], labels[0:3], loc="lower right")
+plt.tight_layout()
+f.savefig(plot_path, dpi=600)
+1 / 0
+
 pal_points = "colorblind"
 pal_violins = "pastel"
 
 g = sns.FacetGrid(
-    csv,
-    col="source",
-    col_order=sources,
-    sharey=False,
-    height=5,
-    aspect=0.6,
+    csv, col="source", col_order=sources, sharey=False, height=5, aspect=0.6,
 )
 
 g = g.map(
@@ -41,7 +67,7 @@ g = g.map(
 
 g = g.map(
     sns.stripplot,
-    "type", # was type
+    "type",  # was type
     "seconds",
     dodge=True,
     order=types,
@@ -51,7 +77,7 @@ g = g.map(
 )
 
 g.despine(left=True)
-g.set(yscale ='log', ylim=(0.0009, 1))
+g.set(yscale="log", ylim=(0.0009, 1))
 
 # Set axis labels & ticks #
 for ax in g.fig.get_axes():
