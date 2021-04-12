@@ -19,7 +19,7 @@ sources = ("local", "http", "s3")
 orders = {"type": types, "source": sources}
 
 
-f, ax = plt.subplots(figsize=(8, 10))
+f, ax = plt.subplots(figsize=(12, 9))
 ax = pt.RainCloud(
     x="type",
     y="seconds",
@@ -29,7 +29,7 @@ ax = pt.RainCloud(
     # bw = .2,
     width_viol=0.4,
     ax=ax,
-    # orient = "h",
+    orient="h",
     alpha=0.65,
     # dodge = True,
     jitter=0.02,
@@ -38,10 +38,10 @@ ax = pt.RainCloud(
 )
 
 # ax.set(ylim=(0.0002, 5))
-ax.set_yscale("log")
+ax.set_xscale("log")
 ax.set_title("")
 handles, labels = ax.get_legend_handles_labels()
-plt.legend(handles[0:3], labels[0:3], loc="lower right")
+plt.legend(handles[0:3], labels[0:3], loc="lower left")
 plt.tight_layout()
 f.savefig(plot_path, dpi=600)
 1 / 0
