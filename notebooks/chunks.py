@@ -20,7 +20,7 @@ def plot(ax, twoD=True):
     if twoD:
         shape = (1, 8, 1, 2 ** 16, 2 ** 16)
         chunkSizesXY = [32, 1024]
-        chunkSizesOther = (1, 4, 8)
+        chunkSizesOther = (1, 2, 4, 8)
     else:
         shape = (100, 1, 1024, 1024, 1024)
         chunkSizesXY = (16, 32, 64, 128)
@@ -77,14 +77,14 @@ def plot(ax, twoD=True):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
-    parser.add_argument("--dpi", type=int, default=300)
+    parser.add_argument("--dpi", type=int, default=600)
     ns = parser.parse_args()
     # fig = plt.figure()
     # ax2D = fig.add_subplot(2, 1, 1)
     # ax3D = fig.add_subplot(2, 1, 2)
 
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-    plot(ax[1], True)
     plot(ax[0], False)
+    plot(ax[1], True)
 
     plt.savefig(ns.filename, dpi=ns.dpi)
