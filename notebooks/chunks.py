@@ -44,6 +44,7 @@ def plot(ax, twoD=True):
         annTitle = "Chosen chunk size:\n32 x 32 x 32 x 1 x 1"
         xy = ((32), file_count(shape, 32, chunkZ=32))
 
+    styles = ["solid", "dashed", "dashdot", "dotted"]
     for chunkOther in chunkSizesOther:
         numFiles = []
         fileSize = []
@@ -57,7 +58,13 @@ def plot(ax, twoD=True):
                 )
             numFiles.append(count)
             fileSize.append(i)
-        ax.plot(fileSize, numFiles, linewidth=4.0, label=f"{chunkOther}")
+        ax.plot(
+            fileSize,
+            numFiles,
+            linewidth=4.0,
+            label=f"{chunkOther}",
+            linestyle=styles.pop(0),
+        )
 
         ax.annotate(
             annTitle,
@@ -69,7 +76,11 @@ def plot(ax, twoD=True):
             horizontalalignment="left",
             verticalalignment="center",
         )
-        ax.legend(loc="lower left", title=f"Chunk size ({chunkDim})", frameon=False)
+        leg = ax.legend(
+            loc="lower left", title=f"Chunk size ({chunkDim})", frameon=False
+        )
+        for legobj in leg.legendHandles:
+            legobj.set_linewidth(2.0)
 
     return fig
 
@@ -83,8 +94,9 @@ if __name__ == "__main__":
     # ax2D = fig.add_subplot(2, 1, 1)
     # ax3D = fig.add_subplot(2, 1, 2)
 
+    plt.style.use("seaborn-colorblind")
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-    plot(ax[0], False)
-    plot(ax[1], True)
+    plot(ax[1], False)
+    plot(ax[0], True)
 
     plt.savefig(ns.filename, dpi=ns.dpi)
