@@ -65,7 +65,7 @@ def plot(ax, twoD=True):
             xytext=(0, 40),
             textcoords="offset points",
             arrowprops=dict(facecolor="black", shrink=0.05),
-            horizontalalignment="left",
+            horizontalalignment="center",
             verticalalignment="bottom",
         )
         ax.legend(loc="lower left", title=f"Chunk size ({chunkDim})", frameon=False)
@@ -76,13 +76,13 @@ def plot(ax, twoD=True):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
-    parser.add_argument("--dpi", type=int, default=800)
+    parser.add_argument("--dpi", type=int, default=300)
     ns = parser.parse_args()
     # fig = plt.figure()
     # ax2D = fig.add_subplot(2, 1, 1)
     # ax3D = fig.add_subplot(2, 1, 2)
 
-    fig, ax = plt.subplots(1, 2)
+    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
     plot(ax[0], True)
     plot(ax[1], False)
 
