@@ -16,6 +16,14 @@ def file_count(shape, chunkXY, chunkZ=1, chunkT=1, chunkC=1):
     )
 
 
+grays = (
+    (0.2, 0.2, 0.2),
+    (0.4, 0.4, 0.4),
+    (0.6, 0.6, 0.6),
+    (0.8, 0.8, 0.8),
+)
+
+
 def plot(ax, twoD=True):
     if twoD:
         shape = (1, 8, 1, 2 ** 16, 2 ** 16)
@@ -45,7 +53,7 @@ def plot(ax, twoD=True):
         xy = ((32), file_count(shape, 32, chunkZ=32))
 
     styles = ["solid", "dashed", "dashdot", "dotted"]
-    for chunkOther in chunkSizesOther:
+    for whichChunk, chunkOther in enumerate(chunkSizesOther):
         numFiles = []
         fileSize = []
         for i in chunkSizesXY:
@@ -64,6 +72,7 @@ def plot(ax, twoD=True):
             linewidth=4.0,
             label=f"{chunkOther}",
             linestyle=styles.pop(0),
+            color=grays[whichChunk],
         )
 
         ax.annotate(
@@ -94,7 +103,6 @@ if __name__ == "__main__":
     # ax2D = fig.add_subplot(2, 1, 1)
     # ax3D = fig.add_subplot(2, 1, 2)
 
-    plt.style.use("seaborn-colorblind")
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
     plot(ax[1], False)
     plot(ax[0], True)
