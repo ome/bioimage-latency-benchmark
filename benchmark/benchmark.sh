@@ -17,4 +17,4 @@ do
     head ${BENCHMARK_DATA}/${i}_benchmark_data.csv
 done
 
-python plot_results.py
+python plot_results.py ${BENCHMARK_DATA}/${i}_benchmark_data.csv ${BENCHMARK_PLOT}
