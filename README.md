@@ -1,4 +1,6 @@
 [![DOI](https://zenodo.org/badge/329595844.svg)](https://zenodo.org/badge/latestdoi/329595844)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ome/ngff-latency-benchmark/master?filepath=notebooks)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ome/ngff-latency-benchmark/)
 
 # OME-NGFF: latency benchmark
 
@@ -40,3 +42,4 @@ docker-compose run --rm benchmark -sv
 
 This will store both the benchmarking results ('benchmark_data.json') as well as a plotted graph
 ('benchmark_plot.png') in the directory along with the input data.
+
