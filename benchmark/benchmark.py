@@ -183,7 +183,7 @@ def file_type(request, source):
                     try:
                         group = zarr.group(store=store)
                         data = group["0"]
-                    except KeyError:
+                    except (KeyError, ValueError):
                         # This likely happens due to dim
                         data = zarr.open(store, mode="r")
                     chunks = data.chunks

@@ -1,7 +1,8 @@
+[![DOI](https://zenodo.org/badge/329595844.svg)](https://zenodo.org/badge/latestdoi/329595844)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ome/ngff-latency-benchmark/master?filepath=notebooks)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ome/ngff-latency-benchmark/)
 
-# How to use this repository
+# OME-NGFF: latency benchmark
 
 To get started, clone this repository locally:
 ```
@@ -19,16 +20,6 @@ You will likely want to adjust the parameters in `.env` first, then run:
 
 which will run several docker-compose commands in a row. This could take
 a substantial amount of time depending on your parameters.
-
-## Or, alternatively download a sample file
-
-```
-mkdir data
-cd data
-../retina.sh
-```
-
-If you choose to use `retina_large`, you will also need to adjust the parameters in `.env`.
 
 
 ## Then, start S3 and upload the data
