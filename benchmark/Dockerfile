@@ -13,5 +13,6 @@ COPY plot_results.py /benchmark/plot_results.py
 RUN conda run -n benchmark pip install pytest-profiling
 RUN conda run -n benchmark pip install seaborn
 RUN conda run -n benchmark pip install pytest-csv
+RUN conda run -n benchmark pip install ptitprince
 
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "benchmark", "bash", "/benchmark/benchmark.sh"]
