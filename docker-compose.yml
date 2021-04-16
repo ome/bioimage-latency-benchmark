@@ -32,9 +32,10 @@ services:
     environment:
       - BASE
       - DIR
+      - NAME
       - HOST
-      - MINIO_ACCESS_KEY
-      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY=${AWS_ACCESS_KEY_ID}
+      - MINIO_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
 
   benchmark:
     build: benchmark
@@ -45,6 +46,10 @@ services:
       - "${DIR}:${DIR}"
       - "./benchmark:/benchmark:ro"
     environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - BUCKET
+      - S3ARGS
       - XY
       - Z
       - C
@@ -52,6 +57,7 @@ services:
       - XC
       - ZC
       - BASE
+      - NAME
       - DIR
       - HOST
       - ROUNDS
@@ -71,8 +77,8 @@ services:
     expose:
       - "9000"
     environment:
-      - MINIO_ACCESS_KEY
-      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY=${AWS_ACCESS_KEY_ID}
+      - MINIO_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
     command: server http://minio{1...4}/data{1...2}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -88,8 +94,8 @@ services:
     expose:
       - "9000"
     environment:
-      - MINIO_ACCESS_KEY
-      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY=${AWS_ACCESS_KEY_ID}
+      - MINIO_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
     command: server http://minio{1...4}/data{1...2}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -105,8 +111,8 @@ services:
     expose:
       - "9000"
     environment:
-      - MINIO_ACCESS_KEY
-      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY=${AWS_ACCESS_KEY_ID}
+      - MINIO_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
     command: server http://minio{1...4}/data{1...2}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -122,8 +128,8 @@ services:
     expose:
       - "9000"
     environment:
-      - MINIO_ACCESS_KEY
-      - MINIO_SECRET_KEY
+      - MINIO_ACCESS_KEY=${AWS_ACCESS_KEY_ID}
+      - MINIO_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
     command: server http://minio{1...4}/data{1...2}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]

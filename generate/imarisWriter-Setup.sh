@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 #hdf5
 
+set -e
+set -u
+set -x
+
 wget -N -O CMake-hdf5-1.12.0.tar.gz "https://www.hdfgroup.org/package/cmake-hdf5-1-12-0-tar-gz/?wpdmdl=14580&refresh=600867a2422561611163554"
 tar -xzf CMake-hdf5-1.12.0.tar.gz
 cd CMake-hdf5-1.12.0
@@ -30,10 +34,12 @@ cd lz4-dev
 make DESTDIR=../lz4-install install
 cd ..
 
+
 #imarisWriter
-wget -N -O ImarisWriter.zip https://github.com/dgault/ImarisWriter/archive/master.zip
+BRANCH=2021-04-07
+wget -N -O ImarisWriter.zip https://github.com/ome/ImarisWriter/archive/${BRANCH}.zip
 unzip ImarisWriter.zip
-mv ImarisWriter-master ImarisWriter
+mv ImarisWriter-${BRANCH} ImarisWriter
 cd ImarisWriter
 mkdir release
 cd release
@@ -41,10 +47,12 @@ cmake -DHDF5_ROOT:PATH="../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0" -DZLIB_ROOT:
 make install
 cd ../..
 
+
 #imarisWriterTest
-wget -N -O ImarisWriterTest.zip https://github.com/dgault/ImarisWriterTest/archive/ngff-benchmark-gen.zip
+BRANCH=2021-04-08
+wget -N -O ImarisWriterTest.zip https://github.com/ome/ImarisWriterTest/archive/${BRANCH}.zip
 unzip ImarisWriterTest.zip
-mv ImarisWriterTest-ngff-benchmark-gen ImarisWriterTest
+mv ImarisWriterTest-${BRANCH} ImarisWriterTest
 cd ImarisWriterTest/application
 clang++ -std=c++11  -I../.. -L../../ImarisWriter/release/lib -o ImarisWriterTestRelease ImarisWriterTest.cxx -lbpImarisWriter96 -lpthread -rpath ../../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0/lib
 cd ../..
