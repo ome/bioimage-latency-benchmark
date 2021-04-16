@@ -2,7 +2,6 @@
 
 DIR=${DIR:-./data}
 export BENCHMARK_DATA=${DIR}
-export BENCHMARK_PLOT=${DIR}/benchmark_plot.png
 
 set -e
 set -u
@@ -15,6 +14,5 @@ do
     pytest benchmark.py "$@" --csv=${BENCHMARK_DATA}/${i}_benchmark_data.csv \
         --csv-columns status,duration,properties_as_columns,markers_args_as_columns
     head ${BENCHMARK_DATA}/${i}_benchmark_data.csv
+    python plot_results.py ${BENCHMARK_DATA}/${i}_benchmark_data.csv ${BENCHMARK_DATA}/${i}_benchmark_plot.png
 done
-
-python plot_results.py

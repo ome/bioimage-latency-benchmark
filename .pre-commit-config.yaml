@@ -13,10 +13,10 @@ repos:
         args: ["--profile", "black"]
 
   - repo: https://github.com/ambv/black
-    rev: 19.10b0
+    rev: 20.8b1
     hooks:
       - id: black
-        args: [--target-version=py36]
+        args: [--target-version=py37]
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.7.2
@@ -45,7 +45,7 @@ repos:
           - --autofix
 
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.3
+    rev: 3.9.0
     hooks:
       - id: flake8
         additional_dependencies: [
@@ -58,7 +58,7 @@ repos:
           # default black line length is 88
           "--max-line-length=88",
           # Conflicts with black: E203 whitespace before ':'
-          "--ignore=E203",
+          "--ignore=E203,W503",
           "--rst-roles=class,func,ref,module,const",
         ]
 
