@@ -12,8 +12,8 @@ IMS=IMS_XY-${XY}-Z-${Z}-T-${T}-C-${C}-XYC-${XC}-ZC-${ZC}.ims
 ZARR=IMS_XY-${XY}-Z-${Z}-T-${T}-C-${C}-XYC-${XC}-ZC-${ZC}.ome.zarr
 TIFF=IMS_XY-${XY}-Z-${Z}-T-${T}-C-${C}-XYC-${XC}-ZC-${ZC}.ome.tiff
 
-BF2RAW=/tmp/bioformats2raw/build/install/bioformats2raw/bin/bioformats2raw
-RAW2OMETIFF=/tmp/raw2ometiff/build/install/raw2ometiff/bin/raw2ometiff
+BF2RAW=bioformats2raw
+RAW2OMETIFF=raw2ometiff
 
 echo IMS
 time docker-compose run ${CLEAN} -v $DIR:$DIR \
