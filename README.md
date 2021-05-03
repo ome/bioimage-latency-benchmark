@@ -42,4 +42,3 @@ docker-compose run --rm benchmark -sv
 
 This will store both the benchmarking results ('benchmark_data.json') as well as a plotted graph
 ('benchmark_plot.png') in the directory along with the input data.
-
