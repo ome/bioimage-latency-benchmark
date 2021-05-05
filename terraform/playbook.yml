@@ -1,3 +1,4 @@
+---
 - hosts: all
   vars:
     # Should already be set for terraform
@@ -9,7 +10,14 @@
     - apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
 
     - apt: name={{ item }} state=latest update_cache=yes
-      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+      loop:
+        - 'apt-transport-https'
+        - 'ca-certificates'
+        - 'curl'
+        - 'software-properties-common'
+        - 'python3-pip'
+        - 'virtualenv'
+        - 'python3-setuptools'
 
     - apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
@@ -20,7 +28,7 @@
         state: present
 
     - apt: name={{ item }} state=latest update_cache=yes
-      loop: [ 'docker-ce', 'python3', 'python3-pip', 'awscli']
+      loop: ['docker-ce', 'python3', 'python3-pip', 'awscli']
 
     - pip: name={{ item }} executable=pip3
       loop: ['docker', 'docker-compose']
@@ -30,11 +38,21 @@
         dest: 'ngff-latency-benchmark'
 
     - ansible.builtin.command:
-        argv: ["aws", "configure", "set", "aws_access_key_id", "{{ access_key }}"]
+        argv:
+          - "aws"
+          - "configure"
+          - "set"
+          - "aws_access_key_id"
+          - "{{ access_key }}"
       tags: aws
 
     - ansible.builtin.command:
-        argv: ["aws", "configure", "set", "aws_secret_access_key", "{{ secret_key }}"]
+        argv:
+          - "aws"
+          - "configure"
+          - "set"
+          - "aws_secret_access_key"
+          - "{{ secret_key }}"
       tags: aws
 
 - hosts: servers
