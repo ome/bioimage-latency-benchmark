@@ -2,7 +2,6 @@ import json
 import operator
 import random
 import time
-from copy import deepcopy
 
 # for product
 from functools import reduce  # Required in Python 3
