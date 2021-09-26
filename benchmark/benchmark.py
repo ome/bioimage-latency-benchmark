@@ -20,7 +20,7 @@ NAME = environ.get("NAME", "data")
 HOST = environ.get("HOST", "localhost")
 ROUNDS = int(environ.get("ROUNDS", 10))
 S3ARGS = json.loads(environ.get("S3ARGS", "{}"))
-BUCKET = environ.get("BUCKET", "ngff-latency-benchmark")
+BUCKET = environ.get("BUCKET", "bioimage-latency-benchmark")
 
 
 fsspec_default_args = {

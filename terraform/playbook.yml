@@ -34,8 +34,8 @@
       loop: ['docker', 'docker-compose']
 
     - ansible.builtin.git:
-        repo: 'https://github.com/ome/ngff-latency-benchmark'
-        dest: 'ngff-latency-benchmark'
+        repo: 'https://github.com/ome/bioimage-latency-benchmark'
+        dest: 'bioimage-latency-benchmark'
 
     - ansible.builtin.command:
         argv:
@@ -59,7 +59,7 @@
   tasks:
 
     - docker_compose:
-        project_src: "ngff-latency-benchmark"
+        project_src: "bioimage-latency-benchmark"
         state: "present"
         services:
           - "nginx"
@@ -68,5 +68,5 @@
   tasks:
 
     - ansible.builtin.command:
-        chdir: ngff-latency-benchmark
+        chdir: bioimage-latency-benchmark
         argv: ["docker-compose", "build", "benchmark"]

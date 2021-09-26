@@ -1,13 +1,28 @@
 [![DOI](https://zenodo.org/badge/329595844.svg)](https://zenodo.org/badge/latestdoi/329595844)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ome/ngff-latency-benchmark/main?filepath=notebooks)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ome/ngff-latency-benchmark/)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ome/bioimage-latency-benchmark/main?filepath=notebooks)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ome/bioimage-latency-benchmark/)
 
-# OME-NGFF: latency benchmark
+# Bioimage Latency Benchmark
+
+This benchmark measures the time taken to retrieve chunks
+from different binary formats used in bioimaging. Currently,
+TIFF, HDF5 and [Zarr](https://zarr.readthedocs.io/en/stable/)
+are supported.
+
+This benchmark was included in the original
+[OME-NGFF paper](https://doi.org/10.1101/2021.03.31.437929)
+to demonstrate the benefits of next-generation file formats.
+
+The easiest way to get started with the benchmark is by
+using Docker. For more reproducible results, instructions
+are provided on launching dedicated Amazon EC2 instances.
+
+## Quick start
 
 To get started, clone this repository locally:
 ```
-git clone https://github.com/ome/ngff-latency-benchmark.git
-cd ngff-latency-benchmark
+git clone https://github.com/ome/bioimage-latency-benchmark.git
+cd bioimage-latency-benchmark
 ```
 
 ## Generate sample data

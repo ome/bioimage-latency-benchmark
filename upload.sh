@@ -4,7 +4,7 @@ test -e .env && . .env
 HOST=${HOST:-localhost}
 MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
 MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
-BUCKET=${BUCKET:-ngff-latency-benchmark}
+BUCKET=${BUCKET:-bioimage-latency-benchmark}
 NAME=${NAME:-data}
 DIR=${DIR:-./data}
 set -e
