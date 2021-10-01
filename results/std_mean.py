@@ -8,7 +8,7 @@ for csv_file in ["2d_benchmark_data.csv", "3d_benchmark_data.csv"]:
 
     print(csv_file)
 
-    df = pandas.read_csv("2d_benchmark_data.csv")
+    df = pandas.read_csv(csv_file)
 
     print("Mean")
     mean_values = df.groupby(["type", "source"]).mean()
