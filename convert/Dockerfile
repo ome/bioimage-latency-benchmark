@@ -5,9 +5,9 @@ RUN conda install -c ome bioformats2raw raw2ometiff
 # Temporary
 #
 RUN conda install -y -c anaconda -c conda-forge maven git
-RUN git clone -b nested-re-re --depth=1 https://github.com/joshmoore/bioformats2raw /tmp/bioformats2raw
-RUN git clone -b nested --depth=1 https://github.com/joshmoore/raw2ometiff /tmp/raw2ometiff
-RUN git clone -b nested --depth=1 https://github.com/joshmoore/jzarr /tmp/jzarr
+RUN git clone -b 2021-04-17 --depth=1 https://github.com/ome/bioformats2raw /tmp/bioformats2raw
+RUN git clone -b 2021-04-17 --depth=1 https://github.com/ome/raw2ometiff /tmp/raw2ometiff
+RUN git clone -b 2021-04-17 --depth=1 https://github.com/ome/jzarr /tmp/jzarr
 RUN cd /tmp/jzarr \
  && echo "bloscJnaLibraryPath=/opt/conda/lib" > maven.properties \
  && mvn install -DskipTests
