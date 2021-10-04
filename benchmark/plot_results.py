@@ -6,16 +6,23 @@ import pandas as pd
 import ptitprince as pt
 
 
-def plot_csv(filename: str, pngpath: str):
+def plot_csv(
+    filename: str,
+    outpath: str,
+    font: int = 14,
+    width: int = 10,
+    height: int = 4,
+):
     csv = pd.read_csv(filename)
 
-    f, ax = plt.subplots(figsize=(8, 6))
+    f, ax = plt.subplots(figsize=(width, height))
     ax = pt.RainCloud(
         x="type",
         y="seconds",
         hue="source",
         data=csv,
         palette="Set2",
+        order=("Overhead", "Zarr", "TIFF", "HDF5"),
         # bw = .2,
         width_viol=0.6,
         ax=ax,
@@ -30,16 +37,23 @@ def plot_csv(filename: str, pngpath: str):
     # ax.set(ylim=(0.0002, 5))
     ax.set_xscale("log")
     ax.set_xlabel("seconds per chunk")
+    for item in (
+        [ax.title, ax.xaxis.label, ax.yaxis.label]
+        + ax.get_xticklabels()
+        + ax.get_yticklabels()
+    ):
+        item.set_fontsize(font)
+
     ax.axes.get_yaxis().get_label().set_visible(False)
     handles, labels = ax.get_legend_handles_labels()
-    plt.legend(handles[0:3], labels[0:3], loc="lower left")
+    plt.legend(handles[0:3], labels[0:3], loc="lower left", prop={"size": font})
     plt.tight_layout()
-    f.savefig(pngpath, dpi=600)
+    f.savefig(outpath)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("csv", help="input csv file")
-    parser.add_argument("png", help="output png file")
+    parser.add_argument("out", help="output filename")
     ns = parser.parse_args()
-    plot_csv(ns.csv, ns.png)
+    plot_csv(ns.csv, ns.out)

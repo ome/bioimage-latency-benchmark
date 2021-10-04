@@ -16,15 +16,7 @@ def file_count(shape, chunkXY, chunkZ=1, chunkT=1, chunkC=1):
     )
 
 
-grays = (
-    (0.2, 0.2, 0.2),
-    (0.4, 0.4, 0.4),
-    (0.6, 0.6, 0.6),
-    (0.8, 0.8, 0.8),
-)
-
-
-def plot(ax, twoD=True):
+def plot(ax, twoD=True, font=16):
     if twoD:
         shape = (1, 8, 1, 2 ** 16, 2 ** 16)
         chunkSizesXY = [32, 1024]
@@ -41,16 +33,23 @@ def plot(ax, twoD=True):
 
     if twoD:
         ax.set_xlabel("Chunk size (X and Y)")
-        ax.set_title("XYZCT: 64k x 64k x 1 x 8 x 1")
+        ax.set_title("XYZCT: (64k, 64k, 1, 8, 1)")
         chunkDim = "C"
-        annTitle = "Chosen chunk size:\n256 x 256 x 1 x 1 x 1"
+        annTitle = "Chosen chunk size:\n(256, 256, 1, 1, 1)"
         xy = ((256), file_count(shape, 256))
     else:
         ax.set_xlabel("Chunk size (XYZ)")
-        ax.set_title("XYZCT: 1k x 1k x 1k x 1 x 100")
+        ax.set_title("XYZCT: (1k, 1k, 1k, 1, 100)")
         chunkDim = "T"
-        annTitle = "Chosen chunk size:\n32 x 32 x 32 x 1 x 1"
+        annTitle = "Chosen chunk size:\n(32, 32, 32, 1, 1)"
         xy = ((32), file_count(shape, 32, chunkZ=32))
+
+    for item in (
+        [ax.title, ax.xaxis.label, ax.yaxis.label]
+        + ax.get_xticklabels()
+        + ax.get_yticklabels()
+    ):
+        item.set_fontsize(font)
 
     styles = ["solid", "dashed", "dashdot", "dotted"]
     for whichChunk, chunkOther in enumerate(chunkSizesOther):
@@ -69,10 +68,9 @@ def plot(ax, twoD=True):
         ax.plot(
             fileSize,
             numFiles,
-            linewidth=4.0,
+            linewidth=0.5,
             label=f"{chunkOther}",
             linestyle=styles.pop(0),
-            color=grays[whichChunk],
         )
 
         ax.annotate(
@@ -84,12 +82,19 @@ def plot(ax, twoD=True):
             arrowprops=dict(facecolor="black", shrink=0.05),
             horizontalalignment="left",
             verticalalignment="center",
+            fontsize=font - 4,
         )
         leg = ax.legend(
-            loc="lower left", title=f"Chunk size ({chunkDim})", frameon=False
+            loc="lower left",
+            title=f"Chunk size ({chunkDim})",
+            frameon=False,
+            prop={"size": font},
         )
         for legobj in leg.legendHandles:
-            legobj.set_linewidth(2.0)
+            legobj.set_linewidth(0.5)
+
+        for axis in ["top", "bottom", "left", "right"]:
+            ax.spines[axis].set_linewidth(0.5)
 
     return fig
 
@@ -97,7 +102,6 @@ def plot(ax, twoD=True):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filename")
-    parser.add_argument("--dpi", type=int, default=600)
     ns = parser.parse_args()
     # fig = plt.figure()
     # ax2D = fig.add_subplot(2, 1, 1)
@@ -107,4 +111,4 @@ if __name__ == "__main__":
     plot(ax[1], False)
     plot(ax[0], True)
 
-    plt.savefig(ns.filename, dpi=ns.dpi)
+    plt.savefig(ns.filename)
