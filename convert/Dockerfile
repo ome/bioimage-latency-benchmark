@@ -5,6 +5,7 @@ RUN conda install -c ome bioformats2raw raw2ometiff
 # Temporary
 #
 RUN conda install -y -c anaconda -c conda-forge maven git
+RUN conda update -c conda-forge openjdk # Upgrade from JDK8 to JDK11 to fix mvn issues
 RUN git clone -b 2021-04-17 --depth=1 https://github.com/ome/bioformats2raw /tmp/bioformats2raw
 RUN git clone -b 2021-04-17 --depth=1 https://github.com/ome/raw2ometiff /tmp/raw2ometiff
 RUN git clone -b 2021-04-17 --depth=1 https://github.com/ome/jzarr /tmp/jzarr
