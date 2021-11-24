@@ -41,25 +41,30 @@ const baseUrl = new URL(`http://localhost:8080/${DIR}/${NAME}/`);
 const randInt = (max: number) => Math.floor(Math.random() * max);
 
 interface ChoiceProps {
- xy: number, z: number, c: number, t: number, tile_size: number ;
+  xy: number;
+  z: number;
+  c: number;
+  t: number;
+  tile_size: number;
 }
 
-type ChunkCoord = Pick<ChoiceProps, 'z' | 't' | 'c'> & { x: number, y: number };
+type ChunkCoord = Pick<ChoiceProps, "z" | "t" | "c"> & { x: number; y: number };
 
-function get_choices({ xy, z, c, t, tile_size }: ChoiceProps, rounds = 100): [coord: ChunkCoord, chunk_distance: number][] {
+function get_choices(
+  { xy, z, c, t, tile_size }: ChoiceProps,
+  rounds = 100,
+): [coord: ChunkCoord, chunk_distance: number][] {
+  const chunks_xy = Math.floor(xy / tile_size);
+  const chunk_shape = [t, c, z, chunks_xy, chunks_xy];
 
-    const chunks_xy = Math.floor(xy / tile_size);
-    const chunk_shape = [t, c, z, chunks_xy, chunks_xy];
-
-    return Array.from({ length: rounds }, () => {
-      const [it, ic, iz, iy, ix] = chunk_shape.map(randInt);
-      return [
-        { t: it, c: ic, z: iz, y: iy, x: ix },
-        it * z * c + ic * z + iz,
-      ];
-    });
-  }
-
+  return Array.from({ length: rounds }, () => {
+    const [it, ic, iz, iy, ix] = chunk_shape.map(randInt);
+    return [
+      { t: it, c: ic, z: iz, y: iy, x: ix },
+      it * z * c + ic * z + iz,
+    ];
+  });
+}
 
 async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF") {
   if (type === "Zarr") {
@@ -80,13 +85,12 @@ async function main() {
   stream.pipe(process.stdout).on("end", () => process.exit());
 
   const choices = get_choices({
-	  xy: Number(environ["XY"]),
-	  z: Number(environ["Z"]),
-	  t: Number(environ["T"]),
-	  c: Number(environ["C"]),
-	  tile_size: Number(environ["XC"]),
-  }, ROUNDS)
-
+    xy: Number(environ["XY"]),
+    z: Number(environ["Z"]),
+    t: Number(environ["T"]),
+    c: Number(environ["C"]),
+    tile_size: Number(environ["XC"]),
+  }, ROUNDS);
 
   for (const type of ["Zarr", "TIFF", "Indexed-TIFF"] as const) {
     for (let [round, [chunk, chunk_distance]] of choices.entries()) {

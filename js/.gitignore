@@ -8,3 +8,5 @@ data/tmp
 
 node_modules
 .ipynb_checkpoints
+
+idr*/
