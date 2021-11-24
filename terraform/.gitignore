@@ -1,8 +1,0 @@
-.terraform.lock.hcl
-.terraform/
-aws.pem
-aws.pem.pub
-hosts.cfg
-terraform.tfvars
-tfbackend.config
-vendor/
