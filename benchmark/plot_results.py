@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import ptitprince as pt
 
+def fmt_name(name: pd.Series) -> pd.Series:
+    split = name.str.split('-').str
+    return "(X=" + split[1] + ", Y=" + split[1] + ", Z=" + split[3] + ", C=" + split[5] + ", T=" + split[7] + ")"
+
 
 def plot_csv(
     filename: str,
@@ -14,15 +18,15 @@ def plot_csv(
     height: int = 4,
 ):
     csv = pd.read_csv(filename)
+    csv['name'] = fmt_name(csv.name)
 
     f, ax = plt.subplots(figsize=(width, height))
     ax = pt.RainCloud(
-        x="type",
+        x="name",
         y="seconds",
-        hue="source",
+        hue="type",
         data=csv,
         palette="Set2",
-        order=("Overhead", "Zarr", "TIFF", "HDF5"),
         # bw = .2,
         width_viol=0.6,
         ax=ax,
@@ -46,7 +50,7 @@ def plot_csv(
 
     ax.axes.get_yaxis().get_label().set_visible(False)
     handles, labels = ax.get_legend_handles_labels()
-    plt.legend(handles[0:3], labels[0:3], loc="lower left", prop={"size": font})
+    plt.legend(handles[0:3], labels[0:3], loc="lower right", prop={"size": font})
     plt.tight_layout()
     f.savefig(outpath)
 
