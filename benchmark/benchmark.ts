@@ -31,32 +31,26 @@ async function loadOmeZarr(href: string) {
   );
 }
 
-const environ = process.env;
-const DIR = environ["DIR"] ?? "data";
-const NAME = environ["NAME"] ?? "data";
-const ROUNDS = Number(environ["ROUNDS"]) || 10;
-
-const baseUrl = new URL(`http://localhost:8080/${DIR}/${NAME}/`);
-
 const randInt = (max: number) => Math.floor(Math.random() * max);
 
-interface ChoiceProps {
-  xy: number;
+interface ChunkCoord {
+  x: number;
+  y: number;
   z: number;
-  c: number;
   t: number;
-  tile_size: number;
+  c: number;
 }
 
-type ChunkCoord = Pick<ChoiceProps, "z" | "t" | "c"> & { x: number; y: number };
-
 function get_choices(
-  { xy, z, c, t, tile_size }: ChoiceProps,
-  rounds = 100,
+  xy: number,
+  z: number,
+  c: number,
+  t: number,
+  tile_size: number,
+  rounds: number,
 ): [coord: ChunkCoord, chunk_distance: number][] {
   const chunks_xy = Math.floor(xy / tile_size);
   const chunk_shape = [t, c, z, chunks_xy, chunks_xy];
-
   return Array.from({ length: rounds }, () => {
     const [it, ic, iz, iy, ix] = chunk_shape.map(randInt);
     return [
@@ -66,37 +60,43 @@ function get_choices(
   });
 }
 
-async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF") {
+async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF", root: URL) {
   if (type === "Zarr") {
-    return loadOmeZarr(new URL("out/0", baseUrl).href);
+    return loadOmeZarr(new URL("out/0", root).href);
   }
 
   let offsets: number[];
   if (type === "Indexed-TIFF") {
-    const url = new URL("data.offsets.json", baseUrl);
+    const url = new URL("data.offsets.json", root);
     offsets = await fetch(url.href).then((res) => res.json()) as number[];
   }
 
-  return loadOmeTiff(new URL("data.ome.tif", baseUrl).href, offsets);
+  return loadOmeTiff(new URL("data.ome.tif", root).href, offsets);
 }
 
 async function main() {
+  const name = process.env.NAME;
+  const rounds = Number(process.env.ROUNDS || 10);
+  const baseUrl = new URL(`http://localhost:8080/data/${name}/`);
+
   const stream = csv.format({ headers: true });
   stream.pipe(process.stdout).on("end", () => process.exit());
 
-  const choices = get_choices({
-    xy: Number(environ["XY"]),
-    z: Number(environ["Z"]),
-    t: Number(environ["T"]),
-    c: Number(environ["C"]),
-    tile_size: Number(environ["XC"]),
-  }, ROUNDS);
+  const choices = get_choices(
+    Number(process.env.XY),
+    Number(process.env.Z),
+    Number(process.env.C),
+    Number(process.env.T),
+    Number(process.env.XC),
+    rounds,
+  );
 
   for (const type of ["Zarr", "TIFF", "Indexed-TIFF"] as const) {
+
     for (let [round, [chunk, chunk_distance]] of choices.entries()) {
+      let source = await loadSource(type, baseUrl);
       let { x, y, ...selection } = chunk;
 
-      let source = await loadSource(type);
       let start = process.hrtime();
       await source.getTile({ x, y, selection });
       let [_, ns] = process.hrtime(start);
@@ -108,7 +108,7 @@ async function main() {
         round,
         chunk_index: `[${t + 1}, ${c + 1}, ${z + 1}, ${y + 1}, ${x + 1}]`,
         chunk_distance,
-        name: NAME,
+        name,
       });
     }
   }
