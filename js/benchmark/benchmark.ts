@@ -5,17 +5,14 @@ import { HTTPStore, openArray } from "zarr";
 import * as csv from "fast-csv";
 import fetch from "node-fetch";
 
-
 // @ts-ignore
 globalThis.fetch = fetch;
 
 async function loadOmeZarr(href: string) {
-  const store = new HTTPStore(href);
-  const arr = await openArray({ store, path: "0" });
-  const labels = ["t", "c", "z", "y", "x"] as Labels<["t", "c", "z"]>;
+  const arr = await openArray({ store: new HTTPStore(href), path: "0" });
   const source = new ZarrPixelSource(
     arr as any,
-    labels,
+    ["t", "c", "z", "y", "x"] as Labels<["t", "c", "z"]>,
     arr.chunks[arr.chunks.length - 1],
   );
   return { data: [source] };
