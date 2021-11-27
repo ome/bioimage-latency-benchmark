@@ -21,11 +21,8 @@ function getChoices(
   let chunksXY = Math.floor(xy / tileSize);
   let chunkShape = [t, c, z, chunksXY, chunksXY];
   return Array.from({ length: rounds }, () => {
-    let [it, ic, iz, iy, ix] = chunkShape.map(randInt);
-    return [
-      { t: it, c: ic, z: iz, y: iy, x: ix },
-      it * z * c + ic * z + iz,
-    ] as const;
+    let [t, c, z, y, x] = chunkShape.map(randInt);
+    return { t, c, z, y, x } as const;
   });
 }
 
@@ -61,7 +58,7 @@ async function main() {
   );
 
   for (let type of ["Zarr", "TIFF", "Indexed-TIFF"] as const) {
-    for (let [round, [chunk, chunk_distance]] of choices.entries()) {
+    for (let [round, chunk] of choices.entries()) {
       let { data: [source] } = await loadSource(type, baseUrl);
       let { x, y, ...selection } = chunk;
 
@@ -73,7 +70,6 @@ async function main() {
         type,
         seconds: ns * 10e-9,
         round,
-        chunk_distance,
         name,
         t: selection.t + 1,
         c: selection.c + 1,
