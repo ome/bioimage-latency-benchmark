@@ -1,60 +1,42 @@
-import type { Labels } from "@hms-dbmi/viv/src/types";
-import { loadOmeTiff, ZarrPixelSource } from "@hms-dbmi/viv";
-import { HTTPStore, openArray } from "zarr";
-
+import { loadOmeTiff, loadOmeZarr } from "@hms-dbmi/viv";
 import * as csv from "fast-csv";
 import fetch from "node-fetch";
 
 // @ts-ignore
 globalThis.fetch = fetch;
 
-async function loadOmeZarr(href: string) {
-  const arr = await openArray({ store: new HTTPStore(href), path: "0" });
-  const source = new ZarrPixelSource(
-    arr as any,
-    ["t", "c", "z", "y", "x"] as Labels<["t", "c", "z"]>,
-    arr.chunks[arr.chunks.length - 1],
-  );
-  return { data: [source] };
-}
+// @ts-ignore
+console.warn = () => {}; // disable console.warn calls in Viv's TIFF loader
 
-const randInt = (max: number) => Math.floor(Math.random() * max);
+let randInt = (max: number) => Math.floor(Math.random() * max);
 
-interface ChunkCoord {
-  x: number;
-  y: number;
-  z: number;
-  t: number;
-  c: number;
-}
-
-function get_choices(
+function getChoices(
   xy: number,
   z: number,
   c: number,
   t: number,
-  tile_size: number,
+  tileSize: number,
   rounds: number,
-): [coord: ChunkCoord, chunk_distance: number][] {
-  const chunks_xy = Math.floor(xy / tile_size);
-  const chunk_shape = [t, c, z, chunks_xy, chunks_xy];
+) {
+  let chunksXY = Math.floor(xy / tileSize);
+  let chunkShape = [t, c, z, chunksXY, chunksXY];
   return Array.from({ length: rounds }, () => {
-    const [it, ic, iz, iy, ix] = chunk_shape.map(randInt);
+    let [it, ic, iz, iy, ix] = chunkShape.map(randInt);
     return [
       { t: it, c: ic, z: iz, y: iy, x: ix },
       it * z * c + ic * z + iz,
-    ];
+    ] as const;
   });
 }
 
 async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF", root: URL) {
   if (type === "Zarr") {
-    return loadOmeZarr(new URL("out/0", root).href);
+    return loadOmeZarr(new URL("out/0", root).href, { type: 'multiscales' });
   }
 
   let offsets: number[];
   if (type === "Indexed-TIFF") {
-    const url = new URL("data.offsets.json", root);
+    let url = new URL("data.offsets.json", root);
     offsets = await fetch(url.href).then((res) => res.json()) as number[];
   }
 
@@ -62,14 +44,14 @@ async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF", root: URL) {
 }
 
 async function main() {
-  const name = process.env.NAME;
-  const rounds = Number(process.env.ROUNDS || 10);
-  const baseUrl = new URL(`http://localhost:8080/data/${name}/`);
+  let name = process.env.NAME;
+  let rounds = Number(process.env.ROUNDS || 10);
+  let baseUrl = new URL(`http://localhost:8080/data/${name}/`);
 
-  const stream = csv.format({ headers: true });
+  let stream = csv.format({ headers: true });
   stream.pipe(process.stdout).on("end", () => process.exit());
 
-  const choices = get_choices(
+  let choices = getChoices(
     Number(process.env.XY),
     Number(process.env.Z),
     Number(process.env.C),
@@ -78,7 +60,7 @@ async function main() {
     rounds,
   );
 
-  for (const type of ["Zarr", "TIFF", "Indexed-TIFF"] as const) {
+  for (let type of ["Zarr", "TIFF", "Indexed-TIFF"] as const) {
     for (let [round, [chunk, chunk_distance]] of choices.entries()) {
       let { data: [source] } = await loadSource(type, baseUrl);
       let { x, y, ...selection } = chunk;
@@ -87,16 +69,15 @@ async function main() {
       await source.getTile({ x, y, selection });
       let [_, ns] = process.hrtime(start);
 
-      let { t, c, z } = selection;
       stream.write({
         type,
         seconds: ns * 10e-9,
         round,
         chunk_distance,
         name,
-        t: t + 1,
-        c: c + 1,
-        z: z + 1,
+        t: selection.t + 1,
+        c: selection.c + 1,
+        z: selection.z + 1,
         y: y + 1,
         x: x + 1,
       });

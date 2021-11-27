@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "bench": "esbuild --bundle --target=es2020 --platform=node benchmark.ts | node"
+    "bench": "esbuild --external:zarr --bundle --target=es2020 --platform=node benchmark.ts | node"
   },
   "dependencies": {
     "@hms-dbmi/viv": "^0.11.0",
