@@ -1,34 +1,24 @@
-import { load } from "@hms-dbmi/viv/src/loaders/tiff/ome-tiff";
-import { createOffsetsProxy } from "@hms-dbmi/viv/src/loaders/tiff/lib/proxies";
-import { default as ZarrPixelSource } from "@hms-dbmi/viv/src/loaders/zarr/pixel-source";
-
-import { fromUrl } from "geotiff";
+import type { Labels } from "@hms-dbmi/viv/src/types";
+import { loadOmeTiff, ZarrPixelSource } from "@hms-dbmi/viv";
 import { HTTPStore, openArray } from "zarr";
 
 import * as csv from "fast-csv";
 import fetch from "node-fetch";
 
-import type { Labels } from "@hms-dbmi/viv/src/types";
 
 // @ts-ignore
 globalThis.fetch = fetch;
-
-async function loadOmeTiff(href: string, offsets?: number[]) {
-  let tiff = await fromUrl(href, { cacheSize: 0 });
-  if (offsets) tiff = createOffsetsProxy(tiff, offsets);
-  const { data: [base] } = await load(tiff);
-  return base;
-}
 
 async function loadOmeZarr(href: string) {
   const store = new HTTPStore(href);
   const arr = await openArray({ store, path: "0" });
   const labels = ["t", "c", "z", "y", "x"] as Labels<["t", "c", "z"]>;
-  return new ZarrPixelSource(
+  const source = new ZarrPixelSource(
     arr as any,
     labels,
     arr.chunks[arr.chunks.length - 1],
   );
+  return { data: [source] };
 }
 
 const randInt = (max: number) => Math.floor(Math.random() * max);
@@ -71,7 +61,7 @@ async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF", root: URL) {
     offsets = await fetch(url.href).then((res) => res.json()) as number[];
   }
 
-  return loadOmeTiff(new URL("data.ome.tif", root).href, offsets);
+  return loadOmeTiff(new URL("data.ome.tif", root).href, { offsets, pool: false });
 }
 
 async function main() {
@@ -92,9 +82,8 @@ async function main() {
   );
 
   for (const type of ["Zarr", "TIFF", "Indexed-TIFF"] as const) {
-
     for (let [round, [chunk, chunk_distance]] of choices.entries()) {
-      let source = await loadSource(type, baseUrl);
+      let { data: [source] } = await loadSource(type, baseUrl);
       let { x, y, ...selection } = chunk;
 
       let start = process.hrtime();
@@ -106,9 +95,13 @@ async function main() {
         type,
         seconds: ns * 10e-9,
         round,
-        chunk_index: `[${t + 1}, ${c + 1}, ${z + 1}, ${y + 1}, ${x + 1}]`,
         chunk_distance,
         name,
+        t: t + 1,
+        c: c + 1,
+        z: z + 1,
+        y: y + 1,
+        x: x + 1,
       });
     }
   }
