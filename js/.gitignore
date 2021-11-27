@@ -1,0 +1,12 @@
+__pycache__
+data/*.ims
+data/*.tiff
+data/*.zarr
+data/*.bfmemo
+data/tmp
+.swp
+
+node_modules
+.ipynb_checkpoints
+
+idr*/
