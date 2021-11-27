@@ -9,18 +9,19 @@ def fmt_name(name: pd.Series) -> pd.Series:
     split = name.str.split('-').str
     return "(X=" + split[1] + ", Y=" + split[1] + ", Z=" + split[3] + ", C=" + split[5] + ", T=" + split[7] + ")"
 
-def plot_csv(
-    filename: str,
+def plot_combined(
+    files: list[str],
     outpath: str,
     font: int = 14,
     width: int = 10,
     height: int = 4,
 ):
-    csv = pd.read_csv(filename)
+    csv = pd.concat(map(pd.read_csv, files))
+    csv.name = fmt_name(csv.name)
 
     f, ax = plt.subplots(figsize=(width, height))
     ax = pt.RainCloud(
-        x="type",
+        x="name",
         y="seconds",
         hue="type",
         data=csv,
@@ -54,8 +55,5 @@ def plot_csv(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("csv", help="input csv file")
-    parser.add_argument("out", help="output filename")
-    ns = parser.parse_args()
-    plot_csv(ns.csv, ns.out)
+    import sys
+    plot_combined(sys.argv[1:], 'combined.png')

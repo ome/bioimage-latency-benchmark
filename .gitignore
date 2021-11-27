@@ -5,3 +5,8 @@ data/*.zarr
 data/*.bfmemo
 data/tmp
 .swp
+
+node_modules
+.ipynb_checkpoints
+
+idr*/
