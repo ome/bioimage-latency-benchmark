@@ -1,12 +1,11 @@
 __pycache__
-data/*.ims
-data/*.tiff
-data/*.zarr
-data/*.bfmemo
-data/tmp
+data/XY-*
+data/idr*
 .swp
 
 node_modules
 .ipynb_checkpoints
 
-idr*/
+.snakemake
+.DS_Store
+package-lock.json
