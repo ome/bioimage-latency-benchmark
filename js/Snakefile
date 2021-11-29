@@ -17,13 +17,18 @@ DATADIR = Path.cwd().absolute() / 'data'
 SOURCE = DATADIR / os.environ['IDR_ID']
 TARGET = DATADIR / os.environ["NAME"]
 
+rule plot:
+	input: "benchmark_data.csv"
+	output: "benchmark_plot.png"
+	shell: "python ./plot_results.py {input} {output}"
+
 rule benchmark:
 	input: 
 		directory(TARGET / "data.zarr"),
 		TARGET / 'data.ome.tif',
 		TARGET / 'data.offsets.json'
-	output: "results.csv"
-	shell: "npm start > results.csv"
+	output: "benchmark_data.csv"
+	shell: "npm start --silent > {output}"
 
 rule download:
 	output: SOURCE / os.environ["IDR_NAME"]
