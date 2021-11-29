@@ -28,7 +28,7 @@ function getChoices(
 
 async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF", root: URL) {
   if (type === "Zarr") {
-    return loadOmeZarr(new URL("out/0", root).href, { type: 'multiscales' });
+    return loadOmeZarr(new URL("data.zarr/0", root).href, { type: 'multiscales' });
   }
 
   let offsets: number[];
@@ -43,7 +43,7 @@ async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF", root: URL) {
 async function main() {
   let name = process.env.NAME;
   let rounds = Number(process.env.ROUNDS || 10);
-  let baseUrl = new URL(`http://localhost:8080/data/${name}/`);
+  let baseUrl = new URL(`http://localhost:8080/${name}/`);
 
   let stream = csv.format({ headers: true });
   stream.pipe(process.stdout).on("end", () => process.exit());

@@ -18,6 +18,11 @@ def plot_combined(
 ):
     csv = pd.concat(map(pd.read_csv, files))
     csv.name = fmt_name(csv.name)
+    csv.type = csv.type.map({
+        'Zarr': 'OME-NGFF (Zarr)',
+        'TIFF': 'OME-TIFF',
+        'Indexed-TIFF', 'Indexed OME-TIFF',
+    })
 
     f, ax = plt.subplots(figsize=(width, height))
     ax = pt.RainCloud(
