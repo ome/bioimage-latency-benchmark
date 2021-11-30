@@ -53,15 +53,12 @@ async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF") {
 }
 
 async function main() {
-  let { env } = process;
-  let rounds = Number(env.ROUNDS || 10);
-
   let stream = csv.format({ headers: true });
   stream.pipe(process.stdout).on("end", () => process.exit());
 
   // determine shape and tilesize
   let meta = await getArrayMeta();
-  let choices = getChoices(meta, rounds);
+  let choices = getChoices(meta, Number(process.env.ROUNDS || 10));
 
   for (let type of ["TIFF", "Indexed-TIFF", "Zarr"] as const) {
     for (let [round, chunk] of choices.entries()) {
