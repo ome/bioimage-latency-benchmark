@@ -8,17 +8,29 @@ globalThis.fetch = fetch;
 // @ts-ignore
 console.warn = () => {}; // disable console.warn calls in Viv's TIFF loader
 
+let root = new URL(`http://localhost:8080/`);
 let randInt = (max: number) => Math.floor(Math.random() * max);
 
-function getChoices(
+interface ArrayMeta {
   xy: number,
   z: number,
   c: number,
   t: number,
-  tileSize: number,
-  rounds: number,
-) {
-  let chunksXY = Math.floor(xy / tileSize);
+  tilesize: number,
+}
+
+async function getArrayMeta(): Promise<ArrayMeta> {
+	// use Zarr array metadata (JSON) to determine shape and tilesize
+	const response = await fetch(new URL("data.zarr/0/0/.zarray", root).href);
+	const meta = await response.json() as { shape: number[], chunks: number[] };
+	// assumes 5D, XYZCT
+	const [t, c, z, xy] = meta.shape;
+	const tilesize = meta.chunks[meta.chunks.length - 1];
+	return { xy, c, z, t, tilesize };
+}
+
+function getChoices({ xy, z, c, t, tilesize }: ArrayMeta, rounds: number) {
+  let chunksXY = Math.floor(xy / tilesize);
   let chunkShape = [t, c, z, chunksXY, chunksXY];
   return Array.from({ length: rounds }, () => {
     let [t, c, z, y, x] = chunkShape.map(randInt);
@@ -26,15 +38,15 @@ function getChoices(
   });
 }
 
-async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF", root: URL) {
+async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF") {
   if (type === "Zarr") {
     return loadOmeZarr(new URL("data.zarr/0", root).href, { type: 'multiscales' });
   }
 
   let offsets: number[];
   if (type === "Indexed-TIFF") {
-    let url = new URL("data.offsets.json", root);
-    offsets = await fetch(url.href).then((res) => res.json()) as number[];
+	let response = await fetch(new URL("data.offsets.json", root).href);
+	offsets = await response.json() as number[];
   }
 
   return loadOmeTiff(new URL("data.ome.tif", root).href, { offsets, pool: false });
@@ -42,25 +54,18 @@ async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF", root: URL) {
 
 async function main() {
   let { env } = process;
-  let name = `XY-${env.XY}-Z-${env.Z}-C-${env.C}-T-${env.T}-XC-${env.XC}`;
   let rounds = Number(env.ROUNDS || 10);
-  let baseUrl = new URL(`http://localhost:8080/${name}/`);
 
   let stream = csv.format({ headers: true });
   stream.pipe(process.stdout).on("end", () => process.exit());
 
-  let choices = getChoices(
-    Number(env.XY),
-    Number(env.Z),
-    Number(env.C),
-    Number(env.T),
-    Number(env.XC),
-    rounds,
-  );
+  // determine shape and tilesize
+  let meta = await getArrayMeta();
+  let choices = getChoices(meta, rounds);
 
-  for (let type of ["Zarr", "TIFF", "Indexed-TIFF"] as const) {
+  for (let type of ["TIFF", "Indexed-TIFF", "Zarr"] as const) {
     for (let [round, chunk] of choices.entries()) {
-      let { data: [source] } = await loadSource(type, baseUrl);
+      let { data: [source] } = await loadSource(type);
       let { x, y, ...selection } = chunk;
 
       let start = process.hrtime();
@@ -71,7 +76,8 @@ async function main() {
         type,
         seconds: ns * 10e-9,
         round,
-        name,
+        tilesize: meta.tilesize,
+        name: `(XY=${meta.xy}, Z=${meta.z}, C=${meta.c}, T=${meta.t})`,
         t: selection.t + 1,
         c: selection.c + 1,
         z: selection.z + 1,

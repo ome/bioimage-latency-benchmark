@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "esbuild --external:zarr --bundle --target=es2020 --platform=node benchmark.ts | node"
+    "start": "npm run --silent build | node",
+    "build": "esbuild --external:zarr --bundle --platform=node benchmark.ts"
   },
   "dependencies": {
     "@hms-dbmi/viv": "^0.11.0",
