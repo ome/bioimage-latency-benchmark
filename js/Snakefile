@@ -3,18 +3,18 @@ import os
 from pathlib import Path
 
 envvars:
-    "IDR_ID",
-    "IDR_PATH",
-    "IDR_NAME",
-    "XY",
-    "Z",
-    "C",
-    "T",
-    "XC",
-    "NAME"
+	"IDR_ID",
+	"IDR_PATH",
+	"IDR_NAME",
+	"XY",
+	"Z",
+	"C",
+	"T",
+	"XC",
+	"NAME"
 
-DATADIR = Path.cwd().absolute() / 'data'
-SOURCE = DATADIR / os.environ['IDR_ID']
+DATADIR = Path.cwd().absolute() / "data"
+SOURCE = DATADIR / os.environ["IDR_ID"]
 TARGET = DATADIR / os.environ["NAME"]
 
 rule plot:
@@ -25,10 +25,20 @@ rule plot:
 rule benchmark:
 	input: 
 		directory(TARGET / "data.zarr"),
-		TARGET / 'data.ome.tif',
-		TARGET / 'data.offsets.json'
+		TARGET / "data.ome.tif",
+		TARGET / "data.offsets.json",
+		directory("node_modules")
 	output: "benchmark_data.csv"
-	shell: "npm start --silent > {output}"
+	params:
+		datadir=DATADIR
+	shell: """
+	docker run --name web_server --rm -d -p 8080:80 -v {params.datadir}:/usr/share/nginx/html nginx
+	npm start --silent > {output}; docker stop web_server
+	"""
+
+rule install_node_modules:
+	output: directory("node_modules")
+	shell: "npm install"
 
 rule download:
 	output: SOURCE / os.environ["IDR_NAME"]
