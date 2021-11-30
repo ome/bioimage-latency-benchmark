@@ -52,6 +52,7 @@ if __name__ == "__main__":
     ax.legend(handles[0:3], labels[0:3], loc="lower right", fontsize=fontlarge)
 
 
+    ax1.set_title('(X=1920, Y=1920, Z=259, C=4, T=1)', fontsize=fontlarge)
     ax1.set_ylabel('Z index')
     ax1.set_xscale('log')
     ax1.scatter(
@@ -64,6 +65,7 @@ if __name__ == "__main__":
         }),
     )
 
+    ax2.set_title('(X=1920, Y=1920, Z=259, C=4, T=1)', fontsize=fontlarge)
     ax2.set_ylabel('Z index')
     ax2.set_xlabel('seconds per chunk')
     ax2.set_xscale('log')

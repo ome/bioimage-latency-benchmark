@@ -20,7 +20,7 @@ def plot_csv(
         y="seconds",
         hue="type",
         data=csv,
-        palette="Set2",
+        palette="Pastel1",
         # bw = .2,
         width_viol=0.6,
         ax=ax,
