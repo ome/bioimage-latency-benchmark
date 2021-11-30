@@ -16,8 +16,19 @@ cd bioimage-latency-benchmark
 You will likely want to adjust the parameters in `.env` first, then run:
 
 ```
-snakemake --cores all benchmark_plot.png
+snakemake --cores all results.png
 ```
 
-This will store both the benchmarking results ('benchmark_data.csv') as well as a 
-plotted graph ('benchmark_plot.png').
+This will store both the benchmarking results ('results.csv') as well as a 
+plotted graph ('results.png').
+
+
+## Results
+
+The contents of `results/` were generated with the following:
+
+```
+source .env-Z-1   && snakemake --cores all results/XY-1920-Z-1-C-4-T-1-XC-256.csv
+source .env-Z-259 && snakemake --cores all results/XY-1920-Z-259-C-4-T-1-XC-256.csv
+jupyter execute results plots.ipynb
+```
