@@ -19,9 +19,9 @@ if __name__ == "__main__":
     font = 16
     fontlarge = 22
 
-    here = Path(__file__).parent
-    z259 = pd.read_csv(here / 'XY-1920-Z-259-C-4-T-1-XC-256.csv')
-    z1 = pd.read_csv(here / 'XY-1920-Z-1-C-4-T-1-XC-256.csv')
+    results_dir = Path(__file__).parent / '..' / 'results'
+    z259 = pd.read_csv(results_dir / 'XY-1920-Z-259-C-4-T-1-XC-256.csv')
+    z1 = pd.read_csv(results_dir / 'XY-1920-Z-1-C-4-T-1-XC-256.csv')
 
     ax = pt.RainCloud(
         x="name",
@@ -94,4 +94,4 @@ if __name__ == "__main__":
         ):
             item.set_fontsize(font)
 
-    f.savefig(here / 'supp_fig2.png', dpi=300)
+    f.savefig(results_dir / 'supp_fig2.png', dpi=300)

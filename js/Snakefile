@@ -21,7 +21,7 @@ NAME = get_name()
 rule plot:
 	input: "{dataset}.csv"
 	output: "{dataset}.png"
-	shell: "python ./plot_results.py {input} {output}"
+	shell: "python ./scripts/plot_results.py {input} {output}"
 
 rule benchmark:
 	input: 
