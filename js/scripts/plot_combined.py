@@ -94,4 +94,4 @@ if __name__ == "__main__":
         ):
             item.set_fontsize(font)
 
-    f.savefig(results_dir / 'supp_fig2.png', dpi=300)
+    f.savefig(results_dir / 'supp_fig2.png', dpi=300, transparent=False)
