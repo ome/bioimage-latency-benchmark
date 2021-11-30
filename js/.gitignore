@@ -1,6 +1,6 @@
 __pycache__
 data/XY-*
-data/idr*
+data/tmp
 .swp
 
 node_modules
