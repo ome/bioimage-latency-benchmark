@@ -41,19 +41,20 @@ async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF", root: URL) {
 }
 
 async function main() {
-  let name = process.env.NAME;
-  let rounds = Number(process.env.ROUNDS || 10);
+  let { env } = process;
+  let name = `XY-${env.XY}-Z-${env.Z}-C-${env.C}-T-${env.T}-XC-${env.XC}`;
+  let rounds = Number(env.ROUNDS || 10);
   let baseUrl = new URL(`http://localhost:8080/${name}/`);
 
   let stream = csv.format({ headers: true });
   stream.pipe(process.stdout).on("end", () => process.exit());
 
   let choices = getChoices(
-    Number(process.env.XY),
-    Number(process.env.Z),
-    Number(process.env.C),
-    Number(process.env.T),
-    Number(process.env.XC),
+    Number(env.XY),
+    Number(env.Z),
+    Number(env.C),
+    Number(env.T),
+    Number(env.XC),
     rounds,
   );
 
