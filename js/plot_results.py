@@ -5,10 +5,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import ptitprince as pt
 
-def fmt_name(name: pd.Series) -> pd.Series:
-    split = name.str.split('-').str
-    return "(X=" + split[1] + ", Y=" + split[1] + ", Z=" + split[3] + ", C=" + split[5] + ", T=" + split[7] + ")"
-
 def plot_csv(
     filename: str,
     outpath: str,
