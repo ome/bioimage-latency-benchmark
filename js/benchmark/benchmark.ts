@@ -12,21 +12,21 @@ let root = new URL(`http://localhost:8080/`);
 let randInt = (max: number) => Math.floor(Math.random() * max);
 
 interface ArrayMeta {
-  xy: number,
-  z: number,
-  c: number,
-  t: number,
-  tilesize: number,
+  xy: number;
+  z: number;
+  c: number;
+  t: number;
+  tilesize: number;
 }
 
 async function getArrayMeta(): Promise<ArrayMeta> {
-	// use Zarr array metadata (JSON) to determine shape and tilesize
-	const response = await fetch(new URL("data.zarr/0/0/.zarray", root).href);
-	const meta = await response.json() as { shape: number[], chunks: number[] };
-	// assumes 5D, XYZCT
-	const [t, c, z, xy] = meta.shape;
-	const tilesize = meta.chunks[meta.chunks.length - 1];
-	return { xy, c, z, t, tilesize };
+  // use Zarr array metadata (JSON) to determine shape and tilesize
+  const response = await fetch(new URL("data.zarr/0/0/.zarray", root).href);
+  const meta = await response.json() as { shape: number[]; chunks: number[] };
+  // assumes 5D, XYZCT
+  const [t, c, z, xy] = meta.shape;
+  const tilesize = meta.chunks[meta.chunks.length - 1];
+  return { xy, c, z, t, tilesize };
 }
 
 function getChoices({ xy, z, c, t, tilesize }: ArrayMeta, rounds: number) {
@@ -40,13 +40,13 @@ function getChoices({ xy, z, c, t, tilesize }: ArrayMeta, rounds: number) {
 
 async function loadSource(type: "Zarr" | "Indexed-TIFF" | "TIFF") {
   if (type === "Zarr") {
-    return loadOmeZarr(new URL("data.zarr/0", root).href, { type: 'multiscales' });
+    return loadOmeZarr(new URL("data.zarr/0", root).href, { type: "multiscales" });
   }
 
   let offsets: number[];
   if (type === "Indexed-TIFF") {
-	let response = await fetch(new URL("data.offsets.json", root).href);
-	offsets = await response.json() as number[];
+    let response = await fetch(new URL("data.offsets.json", root).href);
+    offsets = await response.json() as number[];
   }
 
   return loadOmeTiff(new URL("data.ome.tif", root).href, { offsets, pool: false });
