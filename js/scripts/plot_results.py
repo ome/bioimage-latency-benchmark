@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import ptitprince as pt
 
+
 def plot_csv(
     filename: str,
     outpath: str,

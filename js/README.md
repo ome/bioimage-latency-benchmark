@@ -30,5 +30,5 @@ You will likely want to adjust the parameters in `.env` first, then run:
 snakemake --cores all results.png
 ```
 
-This will store both the benchmarking results ('results.csv') as well as a 
+This will store both the benchmarking results ('results.csv') as well as a
 plotted graph ('results.png').
