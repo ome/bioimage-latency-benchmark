@@ -5,3 +5,8 @@ data/*.zarr
 data/*.bfmemo
 data/tmp
 .swp
+
+js/data/tmp
+js/data/XY-*
+node_modules
+.snakemake
