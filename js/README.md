@@ -15,7 +15,7 @@ a management system for scalable reproducible analysis pipelines.
 To get started, clone this repository locally and create a `conda` environment:
 
 ```
-git clone https://github.com/js/bioimage-latency-benchmark.git
+git clone https://github.com/ome/bioimage-latency-benchmark.git
 cd bioimage-latency-benchmark/js
 
 conda env create -n viv-bench -f environment.yml
