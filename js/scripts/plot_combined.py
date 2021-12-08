@@ -4,29 +4,14 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import ptitprince as pt
-from matplotlib.colors import ListedColormap
 
-if __name__ == "__main__":
-    f = plt.figure(constrained_layout=True, figsize=(20, 9))
-    gs = f.add_gridspec(2, 3)
 
-    ax = f.add_subplot(gs[:, :2])
-    ax1 = f.add_subplot(gs[0, 2])
-    ax2 = f.add_subplot(gs[1, 2])
-
-    cmap = plt.get_cmap("Pastel1")
-    font = 16
-    fontlarge = 22
-
-    results_dir = Path(__file__).parent / ".." / "results"
-    z259 = pd.read_csv(results_dir / "XY-1920-Z-259-C-4-T-1-XC-256.csv")
-    z1 = pd.read_csv(results_dir / "XY-1920-Z-1-C-4-T-1-XC-256.csv")
-
-    ax = pt.RainCloud(
-        x="name",
+def plt_raincloud(ax, df, cmap):
+    pt.RainCloud(
+        x="type",
         y="seconds",
         hue="type",
-        data=pd.concat((z259, z1)),
+        data=df,
         palette=cmap.name,
         width_viol=0.6,
         ax=ax,
@@ -35,73 +20,77 @@ if __name__ == "__main__":
         jitter=0.03,
         move=0.2,
     )
-
+    ax.legend().set_visible(False)
+    ax.axes.get_yaxis().get_label().set_visible(False)
+    ax.set_title(df['name'][0])
     ax.set_xscale("log")
     ax.set_xlabel("seconds per chunk")
-    ax.yaxis.set_visible(False)
+    return ax
 
-    # add text
-    offset = 0.6
-    ax.text(
-        offset,
-        -0.5,
-        "(X=1920, Y=1920, Z=259, C=4, T=1)",
-        ha="center",
-        va="center",
-        fontsize=fontlarge,
-    )
-    ax.text(
-        offset,
-        0.5,
-        "(X=1920, Y=1920, Z=1, C=4, T=1)",
-        ha="center",
-        va="center",
-        fontsize=fontlarge,
-    )
+def scatter_channel_index(ax, df, cmap, fontsize):
+    ax.set_title(df['name'][0])
+    ax.set_ylabel("Z index")
+    ax.set_xlabel("seconds per chunk")
+    ax.set_xscale("log")
 
-    ax.axes.get_yaxis().get_label().set_visible(False)
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[0:3], labels[0:3], loc="lower right", fontsize=fontlarge)
+    for i in range(1, 5): 
+        types = list(df['type'].unique())
+        subset = df[df['c'] == i]
+        ax.scatter(
+            subset.seconds,
+            subset.z,
+            marker={1: 'D', 2: 'o', 3: 'v', 4: 'x'}[i],
+            c=subset['type'].map(
+                {name: cmap.colors[i] for i, name in enumerate(types)}
+            ),
+            label=str(i),
+            s=60
+        )
 
-    ax1.set_title("(X=1920, Y=1920, Z=259, C=4, T=1)", fontsize=fontlarge)
-    ax1.set_ylabel("Z index")
-    ax1.set_xscale("log")
-    ax1.scatter(
-        z259.seconds,
-        z259.z,
-        c=z259.type.map(
-            {name: cmap.colors[i] for i, name in enumerate(z259.type.unique())}
-        ),
-    )
-
-    ax2.set_title("(X=1920, Y=1920, Z=259, C=4, T=1)", fontsize=fontlarge)
-    ax2.set_ylabel("Z index")
-    ax2.set_xlabel("seconds per chunk")
-    ax2.set_xscale("log")
-    scatter = ax2.scatter(
-        z259.seconds,
-        z259.z,
-        c=z259.c.astype("category"),
-        cmap=ListedColormap(["#cccccc", "#969696", "#636363", "#252525"]),
-    )
-
-    legend1 = ax2.legend(
-        *scatter.legend_elements(),
+    ax.legend(
+        *ax.get_legend_handles_labels(),
         title="C index",
         ncol=2,
-        loc="center",
-        fontsize=font,
-        title_fontsize=font,
+        loc=(0.32, .65), 
+        fontsize=fontsize,
+        title_fontsize=fontsize,
     )
+    for handle in ax.get_legend().legendHandles:
+        handle.set_color('black')
 
-    ax2.add_artist(legend1)
+if __name__ == "__main__":
+    font = 16
+    fontlarge = 22
+    cmap = plt.get_cmap("Dark2")
+
+    results_dir = Path.cwd() / "results"
+    z259 = pd.read_csv(results_dir / "XY-1920-Z-259-C-4-T-1-XC-256.csv")
+    z1 = pd.read_csv(results_dir / "XY-1920-Z-1-C-4-T-1-XC-256.csv")
+
+    f = plt.figure(constrained_layout=True, figsize=(20, 9))
+    gs = f.add_gridspec(2, 2)
+
+    top_left = f.add_subplot(gs[0, 0])
+    bottom_left = f.add_subplot(gs[1, 0], sharex=top_left)
+    right = f.add_subplot(gs[:, 1:2])
+
+
+    plt_raincloud(top_left, z259, cmap)
+    plt_raincloud(bottom_left, z1, cmap)
+    handles, labels = bottom_left.get_legend_handles_labels()
+    bottom_left.legend(handles[0:3], labels[0:3], loc="lower right", fontsize=fontlarge)
+
+    scatter_channel_index(right, z259, cmap, fontsize=fontlarge)
 
     # bump fontsize for each element
-    for a in [ax, ax1, ax2]:
+    for ax in [top_left, bottom_left, right]:
+        ax.title.set_fontsize(fontlarge)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
         for item in (
-            [a.title, a.xaxis.label, a.yaxis.label]
-            + a.get_xticklabels()
-            + a.get_yticklabels()
+            [ax.xaxis.label, ax.yaxis.label]
+            + ax.get_xticklabels()
+            + ax.get_yticklabels()
         ):
             item.set_fontsize(font)
 
