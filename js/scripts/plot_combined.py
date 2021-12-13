@@ -22,41 +22,43 @@ def plt_raincloud(ax, df, cmap):
     )
     ax.legend().set_visible(False)
     ax.axes.get_yaxis().get_label().set_visible(False)
-    ax.set_title(df['name'][0])
+    ax.set_title(df["name"][0])
     ax.set_xscale("log")
     ax.set_xlabel("seconds per chunk")
     return ax
 
+
 def scatter_channel_index(ax, df, cmap, fontsize):
-    ax.set_title(df['name'][0])
+    ax.set_title(df["name"][0])
     ax.set_ylabel("Z index")
     ax.set_xlabel("seconds per chunk")
     ax.set_xscale("log")
 
-    for i in range(1, 5): 
-        types = list(df['type'].unique())
-        subset = df[df['c'] == i]
+    for i in range(1, 5):
+        types = list(df["type"].unique())
+        subset = df[df["c"] == i]
         ax.scatter(
             subset.seconds,
             subset.z,
-            marker={1: 'D', 2: 'o', 3: 'v', 4: 'x'}[i],
-            c=subset['type'].map(
+            marker={1: "D", 2: "o", 3: "v", 4: "x"}[i],
+            c=subset["type"].map(
                 {name: cmap.colors[i] for i, name in enumerate(types)}
             ),
             label=str(i),
-            s=60
+            s=60,
         )
 
     ax.legend(
         *ax.get_legend_handles_labels(),
         title="C index",
         ncol=2,
-        loc=(0.32, .65), 
+        loc=(0.32, 0.65),
         fontsize=fontsize,
         title_fontsize=fontsize,
     )
     for handle in ax.get_legend().legendHandles:
-        handle.set_color('black')
+        handle.set_color("black")
+
 
 if __name__ == "__main__":
     font = 16
@@ -74,7 +76,6 @@ if __name__ == "__main__":
     bottom_left = f.add_subplot(gs[1, 0], sharex=top_left)
     right = f.add_subplot(gs[:, 1:2])
 
-
     plt_raincloud(top_left, z259, cmap)
     plt_raincloud(bottom_left, z1, cmap)
     handles, labels = bottom_left.get_legend_handles_labels()
@@ -85,8 +86,8 @@ if __name__ == "__main__":
     # bump fontsize for each element
     for ax in [top_left, bottom_left, right]:
         ax.title.set_fontsize(fontlarge)
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["top"].set_visible(False)
         for item in (
             [ax.xaxis.label, ax.yaxis.label]
             + ax.get_xticklabels()
