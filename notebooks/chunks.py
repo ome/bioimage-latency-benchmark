@@ -18,7 +18,7 @@ def file_count(shape, chunkXY, chunkZ=1, chunkT=1, chunkC=1):
 
 def plot(ax, twoD=True, font=16):
     if twoD:
-        shape = (1, 8, 1, 2 ** 16, 2 ** 16)
+        shape = (1, 8, 1, 2**16, 2**16)
         chunkSizesXY = [32, 1024]
         chunkSizesOther = (1, 2, 4, 8)
     else:
@@ -29,7 +29,7 @@ def plot(ax, twoD=True, font=16):
     ax.set_ylabel("Number of chunks")
     ax.set_yscale("log")
     ax.set_xscale("log")
-    ax.set(xlim=(10, 2 * 10 ** 3), ylim=(10, 10 ** 8))
+    ax.set(xlim=(10, 2 * 10**3), ylim=(10, 10**8))
 
     if twoD:
         ax.set_xlabel("Chunk size (X and Y)")
