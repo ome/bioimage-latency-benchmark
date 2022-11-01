@@ -20,9 +20,10 @@ cp -r build/_CPack_Packages/Linux/TGZ/HDF5-1.12.0-Linux/HDF_Group/HDF5/1.12.0/in
 cd ..
 
 #zlib
-wget -N -O zlib-1.2.12.tar.gz https://www.zlib.net/zlib-1.2.12.tar.gz
-tar -xzf zlib-1.2.12.tar.gz
-cd zlib-1.2.12/
+ZLIB=1.2.13
+wget -N -O zlib-$(ZLIB).tar.gz https://www.zlib.net/zlib-$(ZLIB).tar.gz
+tar -xzf zlib-$(ZLIB).tar.gz
+cd zlib-$(ZLIB)/
 ./configure --prefix=./zlibInstall
 make install
 cd ..
@@ -43,7 +44,7 @@ mv ImarisWriter-${BRANCH} ImarisWriter
 cd ImarisWriter
 mkdir release
 cd release
-cmake -DHDF5_ROOT:PATH="../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0" -DZLIB_ROOT:PATH="../zlib-1.2.12/zlibInstall" -DLZ4_ROOT:PATH="../lz4-dev/lz4-install/usr/local" ..
+cmake -DHDF5_ROOT:PATH="../CMake-hdf5-1.12.0/HDF_Group/HDF5/1.12.0" -DZLIB_ROOT:PATH="../zlib-$(ZLIB)/zlibInstall" -DLZ4_ROOT:PATH="../lz4-dev/lz4-install/usr/local" ..
 make install
 cd ../..
 
