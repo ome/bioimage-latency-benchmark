@@ -20,7 +20,7 @@ cp -r build/_CPack_Packages/Linux/TGZ/HDF5-1.12.0-Linux/HDF_Group/HDF5/1.12.0/in
 cd ..
 
 #zlib
-wget -N -O zlib-1.2.12.tar.gz https://www.zlib.net/zlib-1.2.12.tar.gz
+wget -N -O zlib-1.2.12.tar.gz https://www.zlib.net/fossils/zlib-1.2.12.tar.gz
 tar -xzf zlib-1.2.12.tar.gz
 cd zlib-1.2.12/
 ./configure --prefix=./zlibInstall
